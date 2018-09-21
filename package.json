@@ -18,7 +18,7 @@
 		"three": "^0.94.0",
 		"uuid": "^3.3.2"
 	},
-	"homepage": "https://borlaym.github.io/space/",
+	"homepage": "https://borlaym.github.io/mmorpg/",
 	"scripts": {
 		"dev": "react-scripts-ts start",
 		"build": "rm -rf docs && react-scripts-ts build && mv build docs",
