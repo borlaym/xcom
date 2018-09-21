@@ -27,7 +27,6 @@ export default class Character {
 			map: this.texture,
 			color: 0x444444,
 			transparent: true,
-			lightMapIntensity: 0.1,
 			side: THREE.DoubleSide
 		});
 
@@ -61,7 +60,6 @@ export default class Character {
 		this.canvas.width = 19
 		this.canvas.height = 21
 		this.ctx.drawImage(this.spriteMap, 55, 69, 19, 21, 0, 0, 19, 21)
-		document.body.appendChild(this.canvas)
 		this.texture.needsUpdate = true
 	}
 }
