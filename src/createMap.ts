@@ -14,7 +14,7 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 	const tileGeometry = new THREE.CubeGeometry(1, 1, 1, 1, 1, 1);
 	const floorGeometry = new THREE.PlaneGeometry(1, 1);
 	const roomMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: roomTexture });
-	const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x111111, map: floorTexture });
+	const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x444444, map: floorTexture });
 	const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
 
 	// Read map definition image
