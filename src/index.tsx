@@ -1,8 +1,9 @@
-import createPlayerMesh from './createPlayerMesh';
 import createMap from 'createMap';
+import Link from './Link';
 // import * as socketio from 'socket.io-client';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
+import { Object3D } from 'three';
 
 // const serverName = process.env.NODE_ENV === 'production' ? 'https://marci-fps-test.herokuapp.com' : 'http://localhost:3001';
 // const connection = socketio(serverName);
@@ -37,17 +38,16 @@ const lightLoaded: Promise<HTMLImageElement> = new Promise(resolve => {
 Promise.all([mapLoaded, lightLoaded])
 	.then(([mapDefinition, lightsDefinition]) => {
 		start(scene, mapDefinition, lightsDefinition);
-
-
 	});
 
-const character = createPlayerMesh()
+const character = new Link();
+character.moveTo(16, 0, 16);
 let colliders: THREE.Object3D[] = []
 
 function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefinition: HTMLImageElement) {
-	scene.add(character)
-	colliders = [character].concat(createMap(scene, mapDefinition, lightsDefinition));
-	camera.lookAt(character.position);
+	scene.add(character.sprite)
+	colliders = [character.collider as Object3D].concat(createMap(scene, mapDefinition, lightsDefinition));
+	camera.lookAt(character.collider.position);
 
 	animate();
 }
@@ -201,11 +201,11 @@ function animate() {
 	}
 	// motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
 
-	const raycaster = new THREE.Raycaster(character.position, motion.clone().normalize());
+	const raycaster = new THREE.Raycaster(character.collider.position, motion.clone().normalize());
 	const results = raycaster.intersectObjects(colliders);
 	const collisions = results.filter(result => result.distance < 0.2);
 	if (!collisions.length) {
-		character.position.add(motion);
+		character.move(motion);
 		camera.position.add(motion);
 	}
 
