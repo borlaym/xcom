@@ -1,9 +1,8 @@
-// import createPlayerMesh from './createPlayerMesh';
+import createPlayerMesh from './createPlayerMesh';
 import createMap from 'createMap';
 // import * as socketio from 'socket.io-client';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
-import { Vector3 } from 'three';
 
 // const serverName = process.env.NODE_ENV === 'production' ? 'https://marci-fps-test.herokuapp.com' : 'http://localhost:3001';
 // const connection = socketio(serverName);
@@ -37,12 +36,21 @@ const lightLoaded: Promise<HTMLImageElement> = new Promise(resolve => {
 
 Promise.all([mapLoaded, lightLoaded])
 	.then(([mapDefinition, lightsDefinition]) => {
-		createMap(scene, mapDefinition, lightsDefinition);
-		camera.lookAt(new Vector3(16, 0, 16));
+		start(scene, mapDefinition, lightsDefinition);
+
 
 	});
 
-// const colliders: THREE.Object3D[] = [map];
+const character = createPlayerMesh()
+let colliders: THREE.Object3D[] = []
+
+function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefinition: HTMLImageElement) {
+	scene.add(character)
+	colliders = [character].concat(createMap(scene, mapDefinition, lightsDefinition));
+	camera.lookAt(character.position);
+
+	animate();
+}
 
 // let players: InterfacePlayer[] = [];
 
@@ -193,12 +201,13 @@ function animate() {
 	}
 	// motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
 
-	// const raycaster = new THREE.Raycaster(camera.position, motion.clone().normalize());
-	// const results = raycaster.intersectObjects(colliders);
-	// const collisions = results.filter(result => result.distance < 1);
-	// if (!collisions.length) {
+	const raycaster = new THREE.Raycaster(character.position, motion.clone().normalize());
+	const results = raycaster.intersectObjects(colliders);
+	const collisions = results.filter(result => result.distance < 0.2);
+	if (!collisions.length) {
+		character.position.add(motion);
 		camera.position.add(motion);
-	// }
+	}
 
 	state.mouseMovement.x = 0;
 	state.mouseMovement.y = 0;
@@ -213,4 +222,3 @@ function animate() {
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
 }
-animate();

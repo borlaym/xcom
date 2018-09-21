@@ -50,7 +50,6 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 			tileMesh.position.x = col;
 			tileMesh.position.z = row;
 			tileMesh.position.y = -0.5;
-			tiles.push(tileMesh)
 			scene.add(tileMesh);
 		}
 		// On black, add a blocking tile
@@ -58,7 +57,6 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 			const tileMesh = new THREE.Mesh(tileGeometry, blackMaterial);
 			tileMesh.position.x = col;
 			tileMesh.position.z = row;
-			tiles.push(tileMesh)
 			scene.add(tileMesh);
 		}
 		// Add light
