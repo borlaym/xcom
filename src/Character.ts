@@ -2,8 +2,8 @@ import * as THREE from "three";
 
 export default class Character {
 	public readonly collider: THREE.Object3D
-	public readonly sprite: THREE.Sprite
-	private readonly spriteMaterial: THREE.SpriteMaterial
+	public readonly sprite: THREE.Mesh
+	private readonly material: THREE.MeshLambertMaterial
 	private readonly canvas: HTMLCanvasElement
 	private readonly ctx: CanvasRenderingContext2D
 	private spriteMap: HTMLImageElement
@@ -22,9 +22,16 @@ export default class Character {
 		this.texture = new THREE.CanvasTexture(this.canvas)
 		this.texture.magFilter = THREE.NearestFilter
 		this.texture.minFilter = THREE.NearestFilter
-		this.spriteMaterial = new THREE.SpriteMaterial({ map: this.texture, color: 0xffffff, transparent: true });
-		this.sprite = new THREE.Sprite(this.spriteMaterial);
-		this.sprite.scale.set(0.5, 0.5, 1)
+		const plane = new THREE.PlaneGeometry(0.5, 0.5);
+		this.material = new THREE.MeshLambertMaterial({
+			map: this.texture,
+			color: 0x444444,
+			transparent: true,
+			lightMapIntensity: 0.1,
+			side: THREE.DoubleSide
+		});
+
+		this.sprite = new THREE.Mesh(plane, this.material);
 
 		const colliderGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5, 1, 1, 1);
 		const colliderMaterial = new THREE.MeshBasicMaterial({ opacity: 0 })

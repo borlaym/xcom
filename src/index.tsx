@@ -48,6 +48,7 @@ function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefini
 	scene.add(character.sprite)
 	colliders = [character.collider as Object3D].concat(createMap(scene, mapDefinition, lightsDefinition));
 	camera.lookAt(character.collider.position);
+	character.sprite.lookAt(camera.position)
 
 	animate();
 }
