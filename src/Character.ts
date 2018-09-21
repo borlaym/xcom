@@ -24,8 +24,9 @@ export default class Character {
 		this.texture.minFilter = THREE.NearestFilter
 		this.spriteMaterial = new THREE.SpriteMaterial({ map: this.texture, color: 0xffffff, transparent: true });
 		this.sprite = new THREE.Sprite(this.spriteMaterial);
+		this.sprite.scale.set(0.5, 0.5, 1)
 
-		const colliderGeometry = new THREE.CubeGeometry(0.2, 0.2, 0.2, 1, 1, 1);
+		const colliderGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5, 1, 1, 1);
 		const colliderMaterial = new THREE.MeshBasicMaterial({ opacity: 0 })
 		this.collider = new THREE.Mesh(colliderGeometry, colliderMaterial);
 

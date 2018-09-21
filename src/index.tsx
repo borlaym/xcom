@@ -203,7 +203,7 @@ function animate() {
 
 	const raycaster = new THREE.Raycaster(character.collider.position, motion.clone().normalize());
 	const results = raycaster.intersectObjects(colliders);
-	const collisions = results.filter(result => result.distance < 0.2);
+	const collisions = results.filter(result => result.distance < 0.5);
 	if (!collisions.length) {
 		character.move(motion);
 		camera.position.add(motion);
