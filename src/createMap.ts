@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement) {
+export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement, lightsDefinition: HTMLImageElement) {
 	const roomTexture = new THREE.TextureLoader().load("textures/1.jpg");
 	roomTexture.wrapS = THREE.RepeatWrapping;
 	roomTexture.wrapT = THREE.RepeatWrapping;
@@ -8,8 +8,8 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 
 	const tileGeometry = new THREE.CubeGeometry(1, 1, 1, 1, 1, 1);
 	const floorGeometry = new THREE.PlaneGeometry(1, 1);
-	const roomMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: roomTexture, side: THREE.DoubleSide });
-	const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+	const roomMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: roomTexture, side: THREE.DoubleSide });
+	const floorMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, side: THREE.DoubleSide });
 
 	// Read map definition image
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -20,13 +20,18 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		throw new Error('Couldnt initialize canvas context for drawing map')
 	}
 	ctx.drawImage(mapDefiniton, 0, 0);
-	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const tileData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, mapDefiniton.width, mapDefiniton.height)
+	ctx.drawImage(lightsDefinition, 0, 0);
+	const lightData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 	const tiles: THREE.Mesh[] = [];
-	for (let i = 0; i < imageData.data.length; i += 4) {
-		const r = imageData.data[i];
-		const g = imageData.data[i + 1];
-		const b = imageData.data[i + 2];
+	const lights: THREE.PointLight[] = [];
+
+	for (let i = 0; i < tileData.data.length; i += 4) {
+		const r = tileData.data[i];
+		const g = tileData.data[i + 1];
+		const b = tileData.data[i + 2];
 		const row = Math.floor((i / 4) / mapDefiniton.width);
 		const col = (i / 4) % mapDefiniton.width;
 		// On white, add a tile
@@ -46,6 +51,14 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 			tileMesh.position.y = -0.5;
 			tiles.push(tileMesh)
 			scene.add(tileMesh);
+		}
+		// Add light
+		if (lightData.data[i + 3] > 0) {
+			const color = lightData.data[i] << 16 | lightData.data[i + 1] << 8 | lightData.data[i + 2];
+			const light = new THREE.PointLight(color, 13, 5, 2);
+			light.position.set(col, 0.5, row);
+			lights.push(light);
+			scene.add(light)
 		}
 	}
 

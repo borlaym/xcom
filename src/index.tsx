@@ -23,14 +23,24 @@ renderer.domElement.onclick = () => {
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const mapDefinition = new Image();
-mapDefinition.onload = start;
-mapDefinition.src = 'maps/map.png';
+const mapLoaded: Promise<HTMLImageElement> = new Promise(resolve => {
+	const mapDefinition = new Image();
+	mapDefinition.onload = () => resolve(mapDefinition);
+	mapDefinition.src = 'maps/map.png';
+})
 
-function start() {
-	createMap(scene, mapDefinition);
-	camera.lookAt(new Vector3(16, 0, 16));
-}
+const lightLoaded: Promise<HTMLImageElement> = new Promise(resolve => {
+	const mapDefinition = new Image();
+	mapDefinition.onload = () => resolve(mapDefinition);
+	mapDefinition.src = 'maps/lights.png';
+})
+
+Promise.all([mapLoaded, lightLoaded])
+	.then(([mapDefinition, lightsDefinition]) => {
+		createMap(scene, mapDefinition, lightsDefinition);
+		camera.lookAt(new Vector3(16, 0, 16));
+
+	});
 
 // const colliders: THREE.Object3D[] = [map];
 
