@@ -1,15 +1,20 @@
 import * as THREE from 'three';
 
 export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement, lightsDefinition: HTMLImageElement) {
-	const roomTexture = new THREE.TextureLoader().load("textures/1.jpg");
+	const roomTexture = new THREE.TextureLoader().load("textures/2.png");
 	roomTexture.wrapS = THREE.RepeatWrapping;
 	roomTexture.wrapT = THREE.RepeatWrapping;
 	roomTexture.repeat.set(1, 1);
 
+	const floorTexture = new THREE.TextureLoader().load("textures/3.png");
+	floorTexture.wrapS = THREE.RepeatWrapping;
+	floorTexture.wrapT = THREE.RepeatWrapping;
+	floorTexture.repeat.set(1, 1);
+
 	const tileGeometry = new THREE.CubeGeometry(1, 1, 1, 1, 1, 1);
 	const floorGeometry = new THREE.PlaneGeometry(1, 1);
 	const roomMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: roomTexture });
-	const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x111111 });
+	const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x111111, map: floorTexture });
 	const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
 
 	// Read map definition image
