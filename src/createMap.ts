@@ -8,8 +8,9 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 
 	const tileGeometry = new THREE.CubeGeometry(1, 1, 1, 1, 1, 1);
 	const floorGeometry = new THREE.PlaneGeometry(1, 1);
-	const roomMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: roomTexture, side: THREE.DoubleSide });
-	const floorMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, side: THREE.DoubleSide });
+	const roomMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: roomTexture });
+	const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x111111 });
+	const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
 
 	// Read map definition image
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -45,10 +46,18 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		// On gray, add a floor tile
 		if (r === 51 && g === 51 && b === 51) {
 			const tileMesh = new THREE.Mesh(floorGeometry, floorMaterial);
-			tileMesh.rotation.x = Math.PI / 2
+			tileMesh.rotation.x = -Math.PI / 2
 			tileMesh.position.x = col;
 			tileMesh.position.z = row;
 			tileMesh.position.y = -0.5;
+			tiles.push(tileMesh)
+			scene.add(tileMesh);
+		}
+		// On black, add a blocking tile
+		if (r === 0 && g === 0 && b === 0) {
+			const tileMesh = new THREE.Mesh(tileGeometry, blackMaterial);
+			tileMesh.position.x = col;
+			tileMesh.position.z = row;
 			tiles.push(tileMesh)
 			scene.add(tileMesh);
 		}
