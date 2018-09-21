@@ -3,6 +3,7 @@ import createMap from 'createMap';
 // import * as socketio from 'socket.io-client';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
+import { Vector3 } from 'three';
 
 // const serverName = process.env.NODE_ENV === 'production' ? 'https://marci-fps-test.herokuapp.com' : 'http://localhost:3001';
 // const connection = socketio(serverName);
@@ -12,7 +13,7 @@ const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.y = 4;
-camera.position.z = 16;
+camera.position.z = 18;
 camera.position.x = 16;
 
 const renderer = new THREE.WebGLRenderer();
@@ -27,8 +28,8 @@ mapDefinition.onload = start;
 mapDefinition.src = 'maps/map.png';
 
 function start() {
-	const tiles = createMap(scene, mapDefinition);
-	camera.lookAt(tiles[5].position);
+	createMap(scene, mapDefinition);
+	camera.lookAt(new Vector3(16, 0, 16));
 }
 
 // const colliders: THREE.Object3D[] = [map];

@@ -32,8 +32,8 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		// On white, add a tile
 		if (r === 255 && g === 255 && b === 255) {
 			const tileMesh = new THREE.Mesh(tileGeometry, roomMaterial);
-			tileMesh.position.x = row;
-			tileMesh.position.z = col;
+			tileMesh.position.x = col;
+			tileMesh.position.z = row;
 			tiles.push(tileMesh)
 			scene.add(tileMesh);
 		}
@@ -41,8 +41,8 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		if (r === 51 && g === 51 && b === 51) {
 			const tileMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 			tileMesh.rotation.x = Math.PI / 2
-			tileMesh.position.x = row;
-			tileMesh.position.z = col;
+			tileMesh.position.x = col;
+			tileMesh.position.z = row;
 			tileMesh.position.y = -0.5;
 			tiles.push(tileMesh)
 			scene.add(tileMesh);
