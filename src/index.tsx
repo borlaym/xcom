@@ -3,6 +3,7 @@ import Link from './Link';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
 import { astar, Graph } from './astar'
+import { Vector3 } from 'three';
 
 const SPEED = 0.1;
 const scene = new THREE.Scene();
@@ -54,6 +55,11 @@ function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefini
 	animate();
 }
 
+interface ICoordinate {
+	x: number,
+	y: number
+}
+
 interface InterfaceState {
 	keysDown: string[],
 	mouseMovement: {
@@ -72,6 +78,7 @@ interface InterfaceState {
 		x: number,
 		y: number
 	} | null,
+	path: ICoordinate[]
 };
 
 const state: InterfaceState = {
@@ -88,6 +95,7 @@ const state: InterfaceState = {
 		x: 16,
 		y: 16
 	},
+	path: [],
 	highlighted: null
 };
 
@@ -105,8 +113,7 @@ document.addEventListener('click', () => {
 		const graph = new Graph(map)
 		const start = graph.grid[state.moveTo.x][state.moveTo.y]
 		const end = graph.grid[state.highlighted.x][state.highlighted.y]
-		console.log(astar.search(graph, start, end))
-		state.moveTo = state.highlighted
+		state.path = astar.search(graph, start, end).map(obj => ({ x: obj.x, y: obj.y }))
 	}
 });
 
@@ -156,8 +163,16 @@ function animate() {
 	}
 
 	// Check for character movement
-	if (state.moveTo) {
-		character.moveTo(state.moveTo.y, -0.2, state.moveTo.x)
+	if (state.path.length) {
+		let nextPath = state.path[0]
+		if (character.position.x === nextPath.x && character.position.y === nextPath.y) {
+			state.path.pop()
+			nextPath = state.path[0]
+		}
+		if (nextPath) {
+			const direction = character.position.sub(new Vector3(nextPath.x, 0, nextPath.y))
+			character.move(direction.clone().setLength(SPEED))
+		}
 	}
 
 	camera.position.add(motion);

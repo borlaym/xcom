@@ -48,6 +48,10 @@ export default class Character {
 		this.collider.position.add(v)
 	}
 
+	public get position() {
+		return this.collider.position
+	}
+
 	private loadSpriteSheet(spriteName: string) {
 		const img = new Image();
 		img.onload = () => this.applySprite()
