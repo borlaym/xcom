@@ -72,7 +72,7 @@ interface InterfaceState {
 		x: number,
 		y: number
 	},
-	moveTo: {
+	characterPos: {
 		x: number,
 		y: number
 	},
@@ -93,7 +93,7 @@ const state: InterfaceState = {
 		x: 0,
 		y: 0
 	},
-	moveTo: {
+	characterPos: {
 		x: 16,
 		y: 16
 	},
@@ -113,8 +113,10 @@ document.addEventListener('click', () => {
 	if (state.highlighted) {
 		// Pathfinding
 		const graph = new Graph(map)
-		const start = graph.grid[state.moveTo.x][state.moveTo.y]
+		const start = graph.grid[state.characterPos.x][state.characterPos.y]
 		const end = graph.grid[state.highlighted.x][state.highlighted.y]
+		console.log(state.characterPos, state.highlighted)
+		console.log(start, end)
 		state.path = astar.search(graph, start, end).map(obj => ({ x: obj.x, y: obj.y }))
 	}
 });
@@ -155,8 +157,8 @@ function animate() {
 			const highlightedTile = tiles.find(t => t.mesh === intersection.object)
 			if (highlightedTile) {
 				state.highlighted = {
-					x: highlightedTile.row,
-					y: highlightedTile.col
+					x: highlightedTile.col,
+					y: highlightedTile.row
 				}
 			}
 		}
@@ -168,12 +170,16 @@ function animate() {
 	if (state.path.length) {
 		let nextPath = state.path[0]
 		if (character.position.x === nextPath.x && character.position.z === nextPath.y) {
-			state.path.pop()
+			const reachedCoordinate = state.path.shift()
+			if (reachedCoordinate) {
+				state.characterPos = reachedCoordinate
+			}
 			nextPath = state.path[0]
 		}
 		if (nextPath) {
-			const direction = character.position.sub(new Vector3(nextPath.x, 0, nextPath.y))
-			character.move(direction.clone().setLength(SPEED).min(direction))
+			console.log(nextPath)
+			const direction = new Vector3(nextPath.x, 0, nextPath.y).sub(character.position)
+			character.move(direction)
 		}
 	}
 
