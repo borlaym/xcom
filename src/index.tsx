@@ -2,6 +2,7 @@ import createMap, { floorMaterial, ITile } from 'createMap';
 import Link from './Link';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
+import { astar, Graph } from './astar'
 
 const SPEED = 0.1;
 const scene = new THREE.Scene();
@@ -38,17 +39,18 @@ Promise.all([mapLoaded, lightLoaded])
 const character = new Link();
 character.moveTo(16, -0.2, 16);
 let tiles: ITile[] = []
+let map: number[][] = []
 
 const highlightedMaterial = floorMaterial.clone()
 highlightedMaterial.color.set(0x00ff00)
 
 function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefinition: HTMLImageElement) {
 	scene.add(character.sprite)
-	const [, floorTiles] = createMap(scene, mapDefinition, lightsDefinition)
+	const [, floorTiles, mapDef] = createMap(scene, mapDefinition, lightsDefinition)
 	tiles = floorTiles
+	map = mapDef
 	camera.lookAt(character.collider.position);
 	character.sprite.lookAt(camera.position)
-
 	animate();
 }
 
@@ -65,7 +67,7 @@ interface InterfaceState {
 	moveTo: {
 		x: number,
 		y: number
-	} | null,
+	},
 	highlighted: {
 		x: number,
 		y: number
@@ -82,7 +84,10 @@ const state: InterfaceState = {
 		x: 0,
 		y: 0
 	},
-	moveTo: null,
+	moveTo: {
+		x: 16,
+		y: 16
+	},
 	highlighted: null
 };
 
@@ -96,6 +101,11 @@ document.addEventListener('keyup', (event) => {
 
 document.addEventListener('click', () => {
 	if (state.highlighted) {
+		// Pathfinding
+		const graph = new Graph(map)
+		const start = graph.grid[state.moveTo.x][state.moveTo.y]
+		const end = graph.grid[state.highlighted.x][state.highlighted.y]
+		console.log(astar.search(graph, start, end))
 		state.moveTo = state.highlighted
 	}
 });

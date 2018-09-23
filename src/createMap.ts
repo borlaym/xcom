@@ -22,7 +22,9 @@ interface ITile {
 	col: number
 }
 
-export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement, lightsDefinition: HTMLImageElement): [THREE.Mesh[], ITile[]] {
+export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement, lightsDefinition: HTMLImageElement):
+	[THREE.Mesh[], ITile[], number[][]]
+{
 
 	// Read map definition image
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -41,12 +43,16 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 	const colliders: THREE.Mesh[] = [];
 	const tiles: ITile[] = [];
 	const lights: THREE.PointLight[] = [];
+	const map: number[][] = []
 
 	for (let i = 0; i < tileData.data.length; i += 4) {
 		const r = tileData.data[i];
 		const g = tileData.data[i + 1];
 		const b = tileData.data[i + 2];
 		const row = Math.floor((i / 4) / mapDefiniton.width);
+		if (!map[row]) {
+			map.push([])
+		}
 		const col = (i / 4) % mapDefiniton.width;
 		// On white, add a tile
 		if (r === 255 && g === 255 && b === 255) {
@@ -69,6 +75,9 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 				col
 			})
 			scene.add(tileMesh);
+			map[map.length - 1].push(1)
+		} else {
+			map[map.length - 1].push(0)
 		}
 		// On black, add a blocking tile
 		if (r === 0 && g === 0 && b === 0) {
@@ -87,7 +96,7 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		}
 	}
 
-	return [colliders, tiles];
+	return [colliders, tiles, map];
 }
 
 export { floorMaterial, ITile }
