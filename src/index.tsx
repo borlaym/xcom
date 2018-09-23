@@ -41,7 +41,7 @@ Promise.all([mapLoaded, lightLoaded])
 	});
 
 const character = new Link();
-character.moveTo(16, 0, 16);
+character.moveTo(16, -0.2, 16);
 let colliders: THREE.Object3D[] = []
 let tiles: THREE.Mesh[] = []
 
