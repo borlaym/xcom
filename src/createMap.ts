@@ -16,7 +16,13 @@ const roomMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: roomT
 const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x444444, map: floorTexture });
 const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
 
-export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement, lightsDefinition: HTMLImageElement) {
+interface ITile {
+	mesh: THREE.Mesh,
+	row: number,
+	col: number
+}
+
+export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement, lightsDefinition: HTMLImageElement): [THREE.Mesh[], ITile[]] {
 
 	// Read map definition image
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -33,7 +39,7 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 	const lightData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
 	const colliders: THREE.Mesh[] = [];
-	const tiles: THREE.Mesh[] = [];
+	const tiles: ITile[] = [];
 	const lights: THREE.PointLight[] = [];
 
 	for (let i = 0; i < tileData.data.length; i += 4) {
@@ -57,7 +63,11 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 			tileMesh.position.x = col;
 			tileMesh.position.z = row;
 			tileMesh.position.y = -0.5;
-			tiles.push(tileMesh)
+			tiles.push({
+				mesh: tileMesh,
+				row,
+				col
+			})
 			scene.add(tileMesh);
 		}
 		// On black, add a blocking tile
@@ -80,6 +90,6 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 	return [colliders, tiles];
 }
 
-export { floorMaterial }
+export { floorMaterial, ITile }
 
 
