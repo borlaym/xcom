@@ -1,4 +1,4 @@
-import createMap from 'createMap';
+import createMap, { floorMaterial } from 'createMap';
 import Link from './Link';
 // import * as socketio from 'socket.io-client';
 import * as THREE from 'three';
@@ -18,7 +18,7 @@ camera.position.x = 16;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.domElement.onclick = () => {
-	renderer.domElement.requestPointerLock();
+	// renderer.domElement.requestPointerLock();
 }
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -43,10 +43,16 @@ Promise.all([mapLoaded, lightLoaded])
 const character = new Link();
 character.moveTo(16, 0, 16);
 let colliders: THREE.Object3D[] = []
+let tiles: THREE.Mesh[] = []
+
+const highlightedMaterial = floorMaterial.clone()
+highlightedMaterial.color.set(0x00ff00)
 
 function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefinition: HTMLImageElement) {
 	scene.add(character.sprite)
-	colliders = [character.collider as Object3D].concat(createMap(scene, mapDefinition, lightsDefinition));
+	const [walls, floorTiles] = createMap(scene, mapDefinition, lightsDefinition)
+	tiles = floorTiles
+	colliders = [character.collider as Object3D].concat(walls);
 	camera.lookAt(character.collider.position);
 	character.sprite.lookAt(camera.position)
 
@@ -127,12 +133,20 @@ interface InterfaceState {
 	mouseMovement: {
 		x: number,
 		y: number
+	},
+	mousePos: {
+		x: number,
+		y: number
 	}
 };
 
 const state: InterfaceState = {
 	keysDown: [],
 	mouseMovement: {
+		x: 0,
+		y: 0,
+	},
+	mousePos: {
 		x: 0,
 		y: 0
 	}
@@ -163,18 +177,21 @@ document.addEventListener('keyup', (event) => {
 const onMouseMove = (event: MouseEvent) => {
 	state.mouseMovement.x += event.movementX;
 	state.mouseMovement.y += event.movementY;
+	state.mousePos.x = (event.clientX / window.innerWidth) * 2 - 1
+	state.mousePos.y = - (event.clientY / window.innerHeight) * 2 + 1;
 };
 
+document.addEventListener("mousemove", onMouseMove, false);
 
-const lockChangeAlert = () => {
-	if (document.pointerLockElement === renderer.domElement) {
-			global.console.log('locked to canvas');
-			document.addEventListener("mousemove", onMouseMove, false);
-		} else {
-			document.removeEventListener("mousemove", onMouseMove, false);
-		}
-	}
-document.addEventListener('pointerlockchange', lockChangeAlert, false);
+// const lockChangeAlert = () => {
+// 	if (document.pointerLockElement === renderer.domElement) {
+// 			global.console.log('locked to canvas');
+// 			document.addEventListener("mousemove", onMouseMove, false);
+// 		} else {
+// 			document.removeEventListener("mousemove", onMouseMove, false);
+// 		}
+// 	}
+// document.addEventListener('pointerlockchange', lockChangeAlert, false);
 
 function animate() {
 	// if (state.mouseMovement.x || state.mouseMovement.y) {
@@ -202,16 +219,29 @@ function animate() {
 	}
 	// motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
 
+	// Check for collisions with character
 	const raycaster = new THREE.Raycaster(character.collider.position, motion.clone().normalize());
 	const results = raycaster.intersectObjects(colliders);
 	const collisions = results.filter(result => result.distance < 0.5);
 	if (!collisions.length) {
-		character.move(motion);
+		// character.move(motion);
 		camera.position.add(motion);
 	}
 
-	state.mouseMovement.x = 0;
-	state.mouseMovement.y = 0;
+	// Check for mouse pointing
+	tiles.forEach(tile => tile.material = floorMaterial)
+	const mouseRaycaster = new THREE.Raycaster();
+	mouseRaycaster.setFromCamera(state.mousePos, camera)
+	const intersects = mouseRaycaster.intersectObjects(tiles)
+	if (intersects.length === 1) {
+		const intersection = intersects[0]
+		if (intersection.object instanceof THREE.Mesh) {
+			intersection.object.material = highlightedMaterial
+		}
+	}
+
+	// state.mouseMovement.x = 0;
+	// state.mouseMovement.y = 0;
 
 	// connection.emit('state', {
 	// 	ry: camera.rotation.y,
