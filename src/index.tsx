@@ -113,11 +113,9 @@ document.addEventListener('click', () => {
 	if (state.highlighted) {
 		// Pathfinding
 		const graph = new Graph(map)
-		const start = graph.grid[state.characterPos.x][state.characterPos.y]
-		const end = graph.grid[state.highlighted.x][state.highlighted.y]
-		console.log(state.characterPos, state.highlighted)
-		console.log(start, end)
-		state.path = astar.search(graph, start, end).map(obj => ({ x: obj.x, y: obj.y }))
+		const start = graph.grid[state.characterPos.y][state.characterPos.x]
+		const end = graph.grid[state.highlighted.y][state.highlighted.x]
+		state.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
 	}
 });
 
@@ -177,7 +175,6 @@ function animate() {
 			nextPath = state.path[0]
 		}
 		if (nextPath) {
-			console.log(nextPath)
 			const direction = new Vector3(nextPath.x, 0, nextPath.y).sub(character.position)
 			character.move(direction)
 		}
