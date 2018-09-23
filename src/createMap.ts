@@ -57,8 +57,8 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		// On white, add a tile
 		if (r === 255 && g === 255 && b === 255) {
 			const tileMesh = new THREE.Mesh(tileGeometry, roomMaterial);
-			tileMesh.position.x = col;
-			tileMesh.position.z = row;
+			tileMesh.position.x = row;
+			tileMesh.position.z = col;
 			colliders.push(tileMesh)
 			scene.add(tileMesh);
 		}
@@ -66,9 +66,9 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		if (r === 51 && g === 51 && b === 51) {
 			const tileMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 			tileMesh.rotation.x = -Math.PI / 2
-			tileMesh.position.x = col;
-			tileMesh.position.z = row;
+			tileMesh.position.x = row;
 			tileMesh.position.y = -0.5;
+			tileMesh.position.z = col;
 			tiles.push({
 				mesh: tileMesh,
 				row,
@@ -82,20 +82,20 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		// On black, add a blocking tile
 		if (r === 0 && g === 0 && b === 0) {
 			const tileMesh = new THREE.Mesh(tileGeometry, blackMaterial);
-			tileMesh.position.x = col;
-			tileMesh.position.z = row;
+			tileMesh.position.x = row;
+			tileMesh.position.z = col;
 			scene.add(tileMesh);
 		}
 		// Add light
 		if (lightData.data[i + 3] > 0) {
 			const color = lightData.data[i] << 16 | lightData.data[i + 1] << 8 | lightData.data[i + 2];
 			const light = new THREE.PointLight(color, 13, 5, 2);
-			light.position.set(col, 0.5, row);
+			light.position.set(row, 0.5, col);
 			lights.push(light);
 			scene.add(light)
 		}
-	}
 
+	}
 	return [colliders, tiles, map];
 }
 

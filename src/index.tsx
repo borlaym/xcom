@@ -8,10 +8,13 @@ import { Vector3 } from 'three';
 const SPEED = 0.1;
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.x = 16;
 camera.position.y = 4;
 camera.position.z = 18;
-camera.position.x = 16;
+camera.rotation.x = -Math.PI / 3
+camera.rotation.y = 0;
+camera.rotation.z = 0;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.domElement.onclick = () => {
@@ -50,7 +53,6 @@ function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefini
 	const [, floorTiles, mapDef] = createMap(scene, mapDefinition, lightsDefinition)
 	tiles = floorTiles
 	map = mapDef
-	camera.lookAt(character.collider.position);
 	character.sprite.lookAt(camera.position)
 	animate();
 }
