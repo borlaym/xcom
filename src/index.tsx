@@ -176,7 +176,12 @@ function animate() {
 		}
 		if (nextPath) {
 			const direction = new Vector3(nextPath.x, 0, nextPath.y).sub(character.position)
-			character.move(direction)
+			if (direction.length() < 0.18) {
+				character.move(direction)
+			} else {
+				direction.divideScalar(5)
+				character.move(direction)
+			}
 		}
 	}
 
