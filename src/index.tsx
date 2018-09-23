@@ -167,13 +167,13 @@ function animate() {
 	// Check for character movement
 	if (state.path.length) {
 		let nextPath = state.path[0]
-		if (character.position.x === nextPath.x && character.position.y === nextPath.y) {
+		if (character.position.x === nextPath.x && character.position.z === nextPath.y) {
 			state.path.pop()
 			nextPath = state.path[0]
 		}
 		if (nextPath) {
 			const direction = character.position.sub(new Vector3(nextPath.x, 0, nextPath.y))
-			character.move(direction.clone().setLength(SPEED))
+			character.move(direction.clone().setLength(SPEED).min(direction))
 		}
 	}
 
