@@ -23,6 +23,7 @@ export default class Character {
 		this.texture.magFilter = THREE.NearestFilter
 		this.texture.minFilter = THREE.NearestFilter
 		const plane = new THREE.PlaneGeometry(0.5, 0.5);
+		plane.translate(0, 0.5, 0)
 		this.material = new THREE.MeshLambertMaterial({
 			map: this.texture,
 			color: 0x444444,

@@ -22,7 +22,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const character = new Link();
-character.moveTo(16, -0.2, 16);
+character.moveTo(16, 0, 16);
 
 const map = new Map('test')
 map.loaded.then(start)

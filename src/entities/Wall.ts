@@ -7,6 +7,7 @@ wallTexture.wrapT = THREE.RepeatWrapping;
 wallTexture.repeat.set(1, 1);
 
 const boxGeometry = new THREE.CubeGeometry(1, 1, 1, 1, 1, 1);
+boxGeometry.translate(0, 0.5, 0)
 const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: wallTexture });
 
 export default class Wall extends MapTile {

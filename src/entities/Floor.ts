@@ -19,8 +19,6 @@ export default class Floor extends MapTile {
 		super(row, col, new THREE.Mesh(floorGeometry, floorMaterial))
 		// Floor tiles are rotated to be facing up
 		this.mesh.rotation.x = -Math.PI / 2
-		this.mesh.position.x = col;
-		this.mesh.position.y = -0.5;
 	}
 
 	public highlight() {
