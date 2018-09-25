@@ -9,7 +9,7 @@ wallTexture.repeat.set(1, 1);
 const boxGeometry = new THREE.CubeGeometry(1, 1, 1, 1, 1, 1);
 const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: wallTexture });
 
-export class Wall extends MapTile {
+export default class Wall extends MapTile {
 	constructor(
 		public readonly row: number,
 		public readonly col: number

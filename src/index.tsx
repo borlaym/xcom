@@ -1,11 +1,10 @@
-import createMap from 'createMap';
 import Link from 'entities/Link';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
 import { astar, Graph } from './astar'
 import { Vector3 } from 'three';
-import MapTile from 'entities/MapTile';
 import Floor from 'entities/Floor';
+import Map from 'entities/Map';
 
 const SPEED = 0.1;
 const scene = new THREE.Scene();
@@ -25,33 +24,18 @@ renderer.domElement.onclick = () => {
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const mapLoaded: Promise<HTMLImageElement> = new Promise(resolve => {
-	const mapDefinition = new Image();
-	mapDefinition.onload = () => resolve(mapDefinition);
-	mapDefinition.src = 'maps/map.png';
-})
 
-const lightLoaded: Promise<HTMLImageElement> = new Promise(resolve => {
-	const mapDefinition = new Image();
-	mapDefinition.onload = () => resolve(mapDefinition);
-	mapDefinition.src = 'maps/lights.png';
-})
+const map = new Map('test')
 
-Promise.all([mapLoaded, lightLoaded])
-	.then(([mapDefinition, lightsDefinition]) => {
-		start(scene, mapDefinition, lightsDefinition);
-	});
+map.loaded.then(start)
 
 const character = new Link();
 character.moveTo(16, -0.2, 16);
-let mapTiles: MapTile[] = []
-let map: number[][] = []
 
-function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefinition: HTMLImageElement) {
+function start() {
 	scene.add(character.sprite)
-	const [tiles, mapDef] = createMap(scene, mapDefinition, lightsDefinition)
-	mapTiles = tiles
-	map = mapDef
+	map.tiles.forEach(tile => scene.add(tile.mesh))
+	map.lights.forEach(light => scene.add(light))
 	character.sprite.lookAt(camera.position)
 	animate();
 }
@@ -111,7 +95,7 @@ document.addEventListener('keyup', (event) => {
 document.addEventListener('click', () => {
 	if (state.highlighted) {
 		// Pathfinding
-		const graph = new Graph(map)
+		const graph = new Graph(map.mapData)
 		const start = graph.grid[state.characterPos.y][state.characterPos.x]
 		const end = graph.grid[state.highlighted.y][state.highlighted.x]
 		state.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
@@ -143,14 +127,14 @@ function animate() {
 	}
 
 	// Check for mouse pointing
-	mapTiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
+	map.tiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
 	const mouseRaycaster = new THREE.Raycaster();
 	mouseRaycaster.setFromCamera(state.mousePos, camera)
-	const intersects = mouseRaycaster.intersectObjects(mapTiles.map(t => t.mesh))
+	const intersects = mouseRaycaster.intersectObjects(map.tiles.map(t => t.mesh))
 	if (intersects.length === 1) {
 		const intersection = intersects[0]
 		const uuid = intersection.object.uuid
-		const floor = mapTiles.find(tile => tile.uuid === uuid)
+		const floor = map.tiles.find(tile => tile.uuid === uuid)
 		if (floor && floor instanceof Floor) {
 			floor.highlight()
 			state.highlighted = {
