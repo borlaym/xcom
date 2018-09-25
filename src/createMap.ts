@@ -1,29 +1,11 @@
 import * as THREE from 'three';
-
-const roomTexture = new THREE.TextureLoader().load("textures/2.png");
-roomTexture.wrapS = THREE.RepeatWrapping;
-roomTexture.wrapT = THREE.RepeatWrapping;
-roomTexture.repeat.set(1, 1);
-
-const floorTexture = new THREE.TextureLoader().load("textures/3.png");
-floorTexture.wrapS = THREE.RepeatWrapping;
-floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.set(1, 1);
-
-const tileGeometry = new THREE.CubeGeometry(1, 1, 1, 1, 1, 1);
-const floorGeometry = new THREE.PlaneGeometry(1, 1);
-const roomMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa, map: roomTexture });
-const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x444444, map: floorTexture });
-const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
-
-interface ITile {
-	mesh: THREE.Mesh,
-	row: number,
-	col: number
-}
+import MapTile from 'entities/MapTile';
+import { Wall } from 'entities/Wall';
+import Floor from 'entities/Floor';
+import { BlackBox } from 'entities/BlackBox';
 
 export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageElement, lightsDefinition: HTMLImageElement):
-	[THREE.Mesh[], ITile[], number[][]]
+	[MapTile[], number[][]]
 {
 
 	// Read map definition image
@@ -40,8 +22,7 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 	ctx.drawImage(lightsDefinition, 0, 0);
 	const lightData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-	const colliders: THREE.Mesh[] = [];
-	const tiles: ITile[] = [];
+	const mapTiles: MapTile[] = [];
 	const lights: THREE.PointLight[] = [];
 	const map: number[][] = []
 
@@ -56,35 +37,23 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 		const col = (i / 4) % mapDefiniton.width;
 		// On white, add a tile
 		if (r === 255 && g === 255 && b === 255) {
-			const tileMesh = new THREE.Mesh(tileGeometry, roomMaterial);
-			tileMesh.position.x = col;
-			tileMesh.position.z = row;
-			colliders.push(tileMesh)
-			scene.add(tileMesh);
+			const wall = new Wall(row, col)
+			mapTiles.push(wall)
 		}
 		// On gray, add a floor tile
 		if (r === 51 && g === 51 && b === 51) {
-			const tileMesh = new THREE.Mesh(floorGeometry, floorMaterial);
-			tileMesh.rotation.x = -Math.PI / 2
-			tileMesh.position.x = col;
-			tileMesh.position.y = -0.5;
-			tileMesh.position.z = row;
-			tiles.push({
-				mesh: tileMesh,
-				row,
-				col
-			})
-			scene.add(tileMesh);
+			const floor = new Floor(row, col)
+			mapTiles.push(floor)
 			map[map.length - 1].push(1)
 		} else {
+			// Everything that is not a floor is not a movable space
 			map[map.length - 1].push(0)
 		}
 		// On black, add a blocking tile
 		if (r === 0 && g === 0 && b === 0) {
-			const tileMesh = new THREE.Mesh(tileGeometry, blackMaterial);
-			tileMesh.position.x = col;
-			tileMesh.position.z = row;
-			scene.add(tileMesh);
+			const blackBox = new BlackBox(row, col)
+			mapTiles.push(blackBox)
+
 		}
 		// Add light
 		if (lightData.data[i + 3] > 0) {
@@ -94,11 +63,9 @@ export default function createMap(scene: THREE.Scene, mapDefiniton: HTMLImageEle
 			lights.push(light);
 			scene.add(light)
 		}
-
 	}
-	return [colliders, tiles, map];
+	mapTiles.forEach(tile => scene.add(tile.mesh))
+	return [mapTiles, map]
 }
-
-export { floorMaterial, ITile }
 
 

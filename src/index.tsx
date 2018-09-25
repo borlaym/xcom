@@ -1,9 +1,11 @@
-import createMap, { floorMaterial, ITile } from 'createMap';
-import Link from './Link';
+import createMap from 'createMap';
+import Link from 'entities/Link';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
 import { astar, Graph } from './astar'
 import { Vector3 } from 'three';
+import MapTile from 'entities/MapTile';
+import Floor from 'entities/Floor';
 
 const SPEED = 0.1;
 const scene = new THREE.Scene();
@@ -42,16 +44,13 @@ Promise.all([mapLoaded, lightLoaded])
 
 const character = new Link();
 character.moveTo(16, -0.2, 16);
-let tiles: ITile[] = []
+let mapTiles: MapTile[] = []
 let map: number[][] = []
-
-const highlightedMaterial = floorMaterial.clone()
-highlightedMaterial.color.set(0x00ff00)
 
 function start(scene: THREE.Scene, mapDefinition: HTMLImageElement, lightsDefinition: HTMLImageElement) {
 	scene.add(character.sprite)
-	const [, floorTiles, mapDef] = createMap(scene, mapDefinition, lightsDefinition)
-	tiles = floorTiles
+	const [tiles, mapDef] = createMap(scene, mapDefinition, lightsDefinition)
+	mapTiles = tiles
 	map = mapDef
 	character.sprite.lookAt(camera.position)
 	animate();
@@ -144,20 +143,19 @@ function animate() {
 	}
 
 	// Check for mouse pointing
-	tiles.forEach(tile => tile.mesh.material = floorMaterial)
+	mapTiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
 	const mouseRaycaster = new THREE.Raycaster();
 	mouseRaycaster.setFromCamera(state.mousePos, camera)
-	const intersects = mouseRaycaster.intersectObjects(tiles.map(t => t.mesh))
+	const intersects = mouseRaycaster.intersectObjects(mapTiles.map(t => t.mesh))
 	if (intersects.length === 1) {
 		const intersection = intersects[0]
-		if (intersection.object instanceof THREE.Mesh) {
-			intersection.object.material = highlightedMaterial
-			const highlightedTile = tiles.find(t => t.mesh === intersection.object)
-			if (highlightedTile) {
-				state.highlighted = {
-					x: highlightedTile.col,
-					y: highlightedTile.row
-				}
+		const uuid = intersection.object.uuid
+		const floor = mapTiles.find(tile => tile.uuid === uuid)
+		if (floor && floor instanceof Floor) {
+			floor.highlight()
+			state.highlighted = {
+				x: floor.col,
+				y: floor.row
 			}
 		}
 	} else {

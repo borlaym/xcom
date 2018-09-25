@@ -1,4 +1,4 @@
-import Character from './Character'
+import Character from 'entities/Character'
 
 export default class CharacterLink extends Character {
 	constructor() {
