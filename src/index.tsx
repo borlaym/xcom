@@ -17,10 +17,14 @@ camera.rotation.y = 0;
 camera.rotation.z = 0;
 
 const renderer = new THREE.WebGLRenderer();
-renderer.domElement.onclick = () => {
-	// renderer.domElement.requestPointerLock();
-}
 renderer.setSize(window.innerWidth, window.innerHeight);
+const clippingPlanes = [
+	new THREE.Plane(new THREE.Vector3(-1, 0, 0), 24),
+	new THREE.Plane(new THREE.Vector3(1, 0, 0), -8),
+	new THREE.Plane(new THREE.Vector3(0, 0, 1), -8),
+	new THREE.Plane(new THREE.Vector3(0, 0, -1), 20),
+];
+renderer.clippingPlanes = clippingPlanes
 document.body.appendChild(renderer.domElement);
 
 const mapLoaded: Promise<HTMLImageElement> = new Promise(resolve => {
@@ -185,7 +189,11 @@ function animate() {
 		}
 	}
 
+	// Move camera
 	camera.position.add(motion);
+
+	// Move clipping planes
+	clippingPlanes.forEach(plane => plane.translate(motion))
 
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
