@@ -5,8 +5,8 @@ import { astar, Graph } from './astar'
 import { Vector3 } from 'three';
 import Floor from 'entities/Floor';
 import Map from 'entities/Map';
+import GameState from 'entities/GameState';
 
-const SPEED = 0.1;
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -18,19 +18,14 @@ camera.rotation.y = 0;
 camera.rotation.z = 0;
 
 const renderer = new THREE.WebGLRenderer();
-renderer.domElement.onclick = () => {
-	// renderer.domElement.requestPointerLock();
-}
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-
-const map = new Map('test')
-
-map.loaded.then(start)
-
 const character = new Link();
 character.moveTo(16, -0.2, 16);
+
+const map = new Map('test')
+map.loaded.then(start)
 
 function start() {
 	scene.add(character.sprite)
@@ -40,50 +35,8 @@ function start() {
 	animate();
 }
 
-interface ICoordinate {
-	x: number,
-	y: number
-}
 
-interface InterfaceState {
-	keysDown: string[],
-	mouseMovement: {
-		x: number,
-		y: number
-	},
-	mousePos: {
-		x: number,
-		y: number
-	},
-	characterPos: {
-		x: number,
-		y: number
-	},
-	highlighted: {
-		x: number,
-		y: number
-	} | null,
-	path: ICoordinate[]
-};
-
-const state: InterfaceState = {
-	keysDown: [],
-	mouseMovement: {
-		x: 0,
-		y: 0,
-	},
-	mousePos: {
-		x: 0,
-		y: 0
-	},
-	characterPos: {
-		x: 16,
-		y: 16
-	},
-	path: [],
-	highlighted: null
-};
-
+const state = new GameState()
 document.addEventListener('keydown', (event) => {
 	state.keysDown = uniq(state.keysDown.concat(event.key));
 });
@@ -103,28 +56,13 @@ document.addEventListener('click', () => {
 });
 
 const onMouseMove = (event: MouseEvent) => {
-	state.mouseMovement.x += event.movementX;
-	state.mouseMovement.y += event.movementY;
-	state.mousePos.x = (event.clientX / window.innerWidth) * 2 - 1
-	state.mousePos.y = - (event.clientY / window.innerHeight) * 2 + 1;
+	state.onMouseMove(event)
 };
 
 document.addEventListener("mousemove", onMouseMove, false);
 
 function animate() {
-	const motion = new THREE.Vector3(0, 0, 0);
-	if (state.keysDown.indexOf('w') > -1) {
-		motion.z -= SPEED;
-	}
-	if (state.keysDown.indexOf('s') > -1) {
-		motion.z += SPEED;
-	}
-	if (state.keysDown.indexOf('a') > -1) {
-		motion.x -= SPEED;
-	}
-	if (state.keysDown.indexOf('d') > -1) {
-		motion.x += SPEED;
-	}
+	const motion = state.motion
 
 	// Check for mouse pointing
 	map.tiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
