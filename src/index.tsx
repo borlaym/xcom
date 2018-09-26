@@ -112,7 +112,7 @@ function animate() {
 		camera.getWorldDirection(cameraDirection)
 		const cameraLookingAt = new Vector3()
 		new THREE.Ray(camera.position, cameraDirection).intersectPlane(new THREE.Plane(new Vector3(0, 1, 0)), cameraLookingAt)
-		const rotation = state.keysDown.indexOf('q') > -1 ? 0.03 : -0.03
+		const rotation = state.keysDown.indexOf('q') > -1 ? -0.05 : 0.05
 		rotateCameraAboutPoint(camera, cameraLookingAt, new Vector3(0, 1, 0), rotation)
 	}
 	motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
