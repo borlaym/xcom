@@ -6,6 +6,7 @@ import { Vector3 } from 'three';
 import Floor from 'entities/Floor';
 import Map from 'entities/Map';
 import GameState from 'entities/GameState';
+import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
 
 const scene = new THREE.Scene();
 
@@ -16,6 +17,7 @@ camera.position.z = 18;
 camera.rotation.x = -Math.PI / 3
 camera.rotation.y = 0;
 camera.rotation.z = 0;
+camera.rotation.order = 'YXZ'
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -106,7 +108,17 @@ function animate() {
 	}
 
 	camera.position.add(motion);
+	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
+		const cameraDirection = new Vector3()
+		camera.getWorldDirection(cameraDirection)
+		const cameraLookingAt = new Vector3()
+		new THREE.Ray(camera.position, cameraDirection).intersectPlane(new THREE.Plane(new Vector3(0, 1, 0)), cameraLookingAt)
+		const rotation = state.keysDown.indexOf('q') > -1 ? 0.03 : -0.03
+		rotateCameraAboutPoint(camera, cameraLookingAt, new Vector3(0, 1, 0), rotation)
+	}
 
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
 }
+
+
