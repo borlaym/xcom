@@ -107,7 +107,6 @@ function animate() {
 		}
 	}
 
-	camera.position.add(motion);
 	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
 		const cameraDirection = new Vector3()
 		camera.getWorldDirection(cameraDirection)
@@ -116,6 +115,9 @@ function animate() {
 		const rotation = state.keysDown.indexOf('q') > -1 ? 0.03 : -0.03
 		rotateCameraAboutPoint(camera, cameraLookingAt, new Vector3(0, 1, 0), rotation)
 	}
+	motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
+	camera.position.add(motion);
+
 
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
