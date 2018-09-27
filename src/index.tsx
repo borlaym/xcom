@@ -111,6 +111,7 @@ function animate() {
 		}
 	} else {
 		character.setAnimation('standing')
+		character.updateFacing()
 	}
 
 	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
