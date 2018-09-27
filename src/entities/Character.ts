@@ -82,11 +82,11 @@ export default abstract class Character {
 		this.updateFacing(v)
 	}
 
-	public updateFacing(v: THREE.Vector3 = this.lastMovement) {
+	public updateFacing(movementDirection: THREE.Vector3 = this.lastMovement) {
 		// Change facing
-		const cameraAdjustedDirection = (new Vector2(v.x, -v.z)).normalize().rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
-		const angle = cameraAdjustedDirection.angle() * (180 / Math.PI)
-		const index = Math.round((((angle < 0 ? angle + 360 : angle)) / 90)) % 4
+		const cameraAdjustedDirection = (new Vector2(movementDirection.x, -movementDirection.z)).rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
+		const angle = cameraAdjustedDirection.angle()
+		const index = Math.round((((angle < 0 ? angle + 2 * Math.PI : angle)) / (Math.PI / 2))) % 4
 		this.facing = [Direction.East, Direction.North, Direction.West, Direction.South][index]
 
 		this.applySprite(this.frame)
