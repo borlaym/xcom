@@ -1,13 +1,19 @@
 import * as THREE from "three";
+import { Frame } from "./Frame";
 
-export type Frame = [number, number, number, number]
+export interface Animation {
+	n: Frame[],
+	e: Frame[],
+	s: Frame[],
+	w: Frame[]
+}
 
-export default class Character {
+export default abstract class Character {
 	public readonly collider: THREE.Object3D
 	public readonly sprite: THREE.Sprite
-	protected readonly frames: {
-		default: Frame,
-		[name: string]: Frame
+	protected abstract readonly frames: {
+		standing: Animation,
+		[name: string]: Animation
 	}
 	private readonly material: THREE.SpriteMaterial
 	private readonly canvas: HTMLCanvasElement
@@ -66,16 +72,16 @@ export default class Character {
 
 	private loadSpriteSheet(spriteName: string) {
 		const img = new Image();
-		img.onload = () => this.applySprite(this.frames.default)
+		img.onload = () => this.applySprite(this.frames.standing.s[0])
 		img.src = spriteName
 		this.spriteMap = img
 	}
 
 	private applySprite(frame: Frame) {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-		this.canvas.width = frame[2]
-		this.canvas.height = frame[3]
-		this.ctx.drawImage(this.spriteMap, frame[0], frame[1], frame[2], frame[3], 0, 0, frame[2], frame[3])
+		this.canvas.width = frame.w
+		this.canvas.height = frame.h
+		this.ctx.drawImage(this.spriteMap, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h)
 		this.texture.needsUpdate = true
 	}
 }
