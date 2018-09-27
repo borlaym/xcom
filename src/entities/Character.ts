@@ -64,6 +64,20 @@ export default abstract class Character {
 	public move(v: THREE.Vector3) {
 		this.sprite.position.add(v)
 		this.collider.position.add(v)
+
+		// Change facing
+		if (v.x > 0) {
+			this.applySprite(this.frames.standing.e[0])
+		}
+		if (v.x < 0) {
+			this.applySprite(this.frames.standing.w[0])
+		}
+		if (v.z > 0) {
+			this.applySprite(this.frames.standing.s[0])
+		}
+		if (v.z < 0) {
+			this.applySprite(this.frames.standing.n[0])
+		}
 	}
 
 	public get position() {
