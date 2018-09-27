@@ -23,7 +23,7 @@ export default abstract class Character {
 		standing: Animation,
 		[name: string]: Animation
 	}
-	private animationLength: number = 500;
+	private animationLength: number = 600;
 	private animation: string = 'standing';
 	private readonly material: THREE.SpriteMaterial
 	private readonly canvas: HTMLCanvasElement
