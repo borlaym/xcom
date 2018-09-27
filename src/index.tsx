@@ -29,6 +29,9 @@ character.moveTo(16, 0, 16);
 const map = new Map('test')
 map.loaded.then(start)
 
+const globalIllumination = new THREE.AmbientLight(0xffffff, 0.4)
+scene.add(globalIllumination)
+
 function start() {
 	scene.add(character.sprite)
 	map.tiles.forEach(tile => scene.add(tile.mesh))

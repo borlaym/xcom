@@ -66,7 +66,7 @@ export default class Map {
 			const col = (i / 4) % image.width;
 			if (imageData.data[i + 3] > 0) {
 				const color = imageData.data[i] << 16 | imageData.data[i + 1] << 8 | imageData.data[i + 2];
-				const light = new THREE.PointLight(color, 13, 5, 2);
+				const light = new THREE.PointLight(color, 13, 4, 3);
 				light.position.set(col, 0.5, row);
 				lights.push(light);
 			}
