@@ -1,6 +1,13 @@
 import * as THREE from "three";
 import { Frame } from "./Frame";
 
+export enum Direction {
+	North = 'n',
+	East = 'e',
+	South = 's',
+	West = 'w'
+}
+
 export interface Animation {
 	n: Frame[],
 	e: Frame[],
@@ -11,10 +18,13 @@ export interface Animation {
 export default abstract class Character {
 	public readonly collider: THREE.Object3D
 	public readonly sprite: THREE.Sprite
+	public facing: Direction = Direction.South
 	protected abstract readonly frames: {
 		standing: Animation,
 		[name: string]: Animation
 	}
+	private animationLength: number = 500;
+	private animation: string = 'standing';
 	private readonly material: THREE.SpriteMaterial
 	private readonly canvas: HTMLCanvasElement
 	private readonly ctx: CanvasRenderingContext2D
@@ -61,27 +71,44 @@ export default abstract class Character {
 		this.sprite.position.set(x, y, z)
 		this.collider.position.set(x, y, z)
 	}
+
 	public move(v: THREE.Vector3) {
 		this.sprite.position.add(v)
 		this.collider.position.add(v)
 
 		// Change facing
 		if (v.x > 0) {
-			this.applySprite(this.frames.standing.e[0])
+			this.facing = Direction.East
 		}
 		if (v.x < 0) {
-			this.applySprite(this.frames.standing.w[0])
+			this.facing = Direction.West
 		}
 		if (v.z > 0) {
-			this.applySprite(this.frames.standing.s[0])
+			this.facing = Direction.South
 		}
 		if (v.z < 0) {
-			this.applySprite(this.frames.standing.n[0])
+			this.facing = Direction.North
 		}
+
+		this.applySprite(this.frame)
+	}
+
+	public setAnimation(name: string) {
+		this.animation = name
+		this.applySprite(this.frame)
 	}
 
 	public get position() {
 		return this.collider.position
+	}
+
+	private get frameSet(): Frame[] {
+		return this.frames[this.animation][this.facing]
+	}
+
+	private get frame(): Frame {
+		const index = Math.floor((Date.now() % this.animationLength) / (this.animationLength / this.frameSet.length))
+		return this.frameSet[index]
 	}
 
 	private loadSpriteSheet(spriteName: string) {

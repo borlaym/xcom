@@ -91,6 +91,7 @@ function animate() {
 
 	// Check for character movement
 	if (state.path.length) {
+		character.setAnimation('walking')
 		let nextPath = state.path[0]
 		if (character.position.x === nextPath.x && character.position.z === nextPath.y) {
 			const reachedCoordinate = state.path.shift()
@@ -101,13 +102,15 @@ function animate() {
 		}
 		if (nextPath) {
 			const direction = new Vector3(nextPath.x, 0, nextPath.y).sub(character.position)
-			if (direction.length() < 0.18) {
+			if (direction.length() < 0.10) {
 				character.move(direction)
 			} else {
-				direction.divideScalar(5)
+				direction.divideScalar(8)
 				character.move(direction)
 			}
 		}
+	} else {
+		character.setAnimation('standing')
 	}
 
 	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
