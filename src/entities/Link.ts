@@ -14,7 +14,7 @@ export default class CharacterLink extends Character {
 		}
 	};
 
-	constructor() {
-		super('textures/link.png');
+	constructor(camera: THREE.Camera) {
+		super('textures/link.png', camera);
 	}
 }

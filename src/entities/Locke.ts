@@ -20,8 +20,8 @@ export default class CharacterLink extends Character {
 			}
 		};
 
-	constructor() {
-		super('textures/locke.png');
+	constructor(camera: THREE.Camera) {
+		super('textures/locke.png', camera);
 		this.sprite.scale.y = 0.7
 	}
 }

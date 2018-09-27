@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Frame } from "./Frame";
+import { Vector2 } from "three";
 
 export enum Direction {
 	North = 'n',
@@ -31,7 +32,8 @@ export default abstract class Character {
 	private spriteMap: HTMLImageElement
 	private readonly texture: THREE.Texture
 	constructor(
-		spriteName: string
+		spriteName: string,
+		private readonly camera: THREE.Camera
 	) {
 		this.canvas = document.createElement('canvas')
 		const ctx = this.canvas.getContext('2d')
@@ -76,19 +78,12 @@ export default abstract class Character {
 		this.sprite.position.add(v)
 		this.collider.position.add(v)
 
+		const cameraAdjustedDirection = (new Vector2(v.x, -v.z)).normalize().rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
+
 		// Change facing
-		if (v.x > 0) {
-			this.facing = Direction.East
-		}
-		if (v.x < 0) {
-			this.facing = Direction.West
-		}
-		if (v.z > 0) {
-			this.facing = Direction.South
-		}
-		if (v.z < 0) {
-			this.facing = Direction.North
-		}
+		const angle = cameraAdjustedDirection.angle() * (180 / Math.PI)
+		const index = Math.round((((angle < 0 ? angle + 360 : angle)) / 90)) % 4
+		this.facing = [Direction.East, Direction.North, Direction.West, Direction.South][index]
 
 		this.applySprite(this.frame)
 	}

@@ -23,7 +23,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const character = new Locke();
+const character = new Locke(camera);
 character.moveTo(16, 0, 16);
 
 const map = new Map('test')
