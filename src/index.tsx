@@ -1,4 +1,4 @@
-import Link from 'entities/Link';
+import Locke from 'entities/Locke';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
 import { astar, Graph } from './astar'
@@ -23,7 +23,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const character = new Link();
+const character = new Locke();
 character.moveTo(16, 0, 16);
 
 const map = new Map('test')
