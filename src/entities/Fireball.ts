@@ -25,4 +25,21 @@ export default class Fireball {
 			this.particles.push(particle);
 		}
 	}
+
+	public updateParticles() {
+		this.particles.forEach((particle: Particle) => {
+			const position = new Vector3(
+				THREE.Math.randFloatSpread(0.3),
+				THREE.Math.randFloatSpread(0.3),
+				THREE.Math.randFloatSpread(0.3)
+			)
+			const distanceFromCenter = position.distanceTo(nullVector)
+			const centerColor = new Color(0xffff00)
+			const outerColor = new Color(0xff0000)
+			const color = centerColor.lerp(outerColor, distanceFromCenter / 0.3)
+			color.add(new Color(THREE.Math.randInt(0, 2), 0, 0));
+			particle.sprite.material.color.set(color)
+			particle.sprite.position.set(position.x, position.y, position.z)
+		})
+	}
 }

@@ -131,7 +131,7 @@ function animate() {
 	}
 	motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
 	camera.position.add(motion);
-
+	fireball.updateParticles()
 
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
