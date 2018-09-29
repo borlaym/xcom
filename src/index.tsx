@@ -7,6 +7,7 @@ import Floor from 'entities/Floor';
 import Map from 'entities/Map';
 import GameState from 'entities/GameState';
 import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
+import Fireball from 'entities/Fireball';
 
 const scene = new THREE.Scene();
 
@@ -25,6 +26,12 @@ document.body.appendChild(renderer.domElement);
 
 const character = new Locke(camera);
 character.moveTo(16, 0, 16);
+
+const fireball = new Fireball()
+fireball.object.position.x = 14
+fireball.object.position.y = 1
+fireball.object.position.z = 14
+scene.add(fireball.object)
 
 const map = new Map('test')
 map.loaded.then(start)
