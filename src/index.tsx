@@ -78,7 +78,7 @@ document.addEventListener('keypress', event => {
 		}
 		fireball.direction = position.clone()
 		position.add(character.position)
-		fireball.object.position.set(position.x, position.y, position.z)
+		fireball.object.position.set(position.x, 0.5, position.z)
 		scene.add(fireball.object)
 	}
 })
@@ -162,7 +162,7 @@ function animate() {
 	renderer.render(scene, camera);
 
 	if (fireball) {
-		fireball.object.position.add(fireball.direction.clone().divideScalar(15))
+		fireball.object.position.add(fireball.direction.clone().divideScalar(12))
 		fireball.updateParticles()
 	}
 }
