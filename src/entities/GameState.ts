@@ -1,5 +1,6 @@
 import ICoordinate from "./Coordinate";
 import { Vector3 } from "three";
+import Character from "./Character";
 
 const SPEED = 0.1;
 
@@ -14,6 +15,7 @@ export default class GameState {
 		y: 16
 	};
 	public highlighted: ICoordinate | null = null;
+	public characters: Character[]
 
 	public onMouseMove(event: MouseEvent) {
 		this.mousePos.x = (event.clientX / window.innerWidth) * 2 - 1

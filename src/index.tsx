@@ -9,6 +9,7 @@ import GameState from 'entities/GameState';
 import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
 import Fireball from 'entities/Fireball';
 import { directionToVector } from 'utils/directionToVector';
+import CharacterSolider from 'entities/Soldier';
 
 const scene = new THREE.Scene();
 
@@ -31,6 +32,14 @@ const character = new Locke(camera);
 character.tilePosition = { x: 16, y: 16}
 character.moveTo(16, 0, 16);
 
+const soldier1 = new CharacterSolider(camera);
+soldier1.tilePosition = { x: 14, y: 14}
+soldier1.moveTo(14, 0, 14)
+
+const soldier2 = new CharacterSolider(camera);
+soldier2.tilePosition = { x: 18, y: 6 }
+soldier2.moveTo(18, 0, 6)
+
 let fireball: Fireball | null = null
 
 const map = new Map('test')
@@ -49,6 +58,11 @@ function start() {
 
 
 const state = new GameState()
+
+state.characters = [soldier1, soldier2]
+scene.add(soldier1.sprite)
+scene.add(soldier2.sprite)
+
 document.addEventListener('keydown', (event) => {
 	state.keysDown = uniq(state.keysDown.concat(event.key));
 });
