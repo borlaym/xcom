@@ -1,4 +1,4 @@
-import { Object3D, Color, Vector3 } from "three";
+import { Object3D, Color, Vector3, PointLight } from "three";
 import Particle from "./Particle";
 import * as THREE from "three";
 
@@ -6,6 +6,7 @@ const nullVector = new Vector3(0, 0, 0)
 
 export default class Fireball {
 	public readonly object: Object3D
+	public direction: Vector3 = new Vector3(0, 0, 0)
 	private readonly particles: Particle[] = []
 	constructor() {
 		this.object = new Object3D()
@@ -24,6 +25,9 @@ export default class Fireball {
 			this.object.add(particle.sprite)
 			this.particles.push(particle);
 		}
+		// Add a light
+		const light = new PointLight(0xff0000, 13, 4, 3)
+		this.object.add(light)
 	}
 
 	public updateParticles() {

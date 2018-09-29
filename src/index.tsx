@@ -8,6 +8,7 @@ import Map from 'entities/Map';
 import GameState from 'entities/GameState';
 import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
 import Fireball from 'entities/Fireball';
+import { Direction } from 'entities/Character';
 
 const scene = new THREE.Scene();
 
@@ -27,11 +28,7 @@ document.body.appendChild(renderer.domElement);
 const character = new Locke(camera);
 character.moveTo(16, 0, 16);
 
-const fireball = new Fireball()
-fireball.object.position.x = 14
-fireball.object.position.y = 1
-fireball.object.position.z = 14
-scene.add(fireball.object)
+let fireball: Fireball | null = null
 
 const map = new Map('test')
 map.loaded.then(start)
@@ -56,6 +53,35 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('keyup', (event) => {
 	state.keysDown = state.keysDown.filter(key => key !== event.key);
 });
+
+document.addEventListener('keypress', event => {
+	if (event.code === 'Space') {
+		if (fireball) {
+			scene.remove(fireball.object)
+			fireball = null
+		}
+		fireball = new Fireball()
+		const position = new Vector3(0, 0, 0)
+		switch (character.facing) {
+			case Direction.North:
+				position.z = -1;
+				break;
+			case Direction.South:
+				position.z = 1;
+				break;
+			case Direction.East:
+				position.x = 1;
+				break;
+			case Direction.West:
+				position.x = -1;
+				break
+		}
+		fireball.direction = position.clone()
+		position.add(character.position)
+		fireball.object.position.set(position.x, position.y, position.z)
+		scene.add(fireball.object)
+	}
+})
 
 document.addEventListener('click', () => {
 	if (state.highlighted) {
@@ -131,10 +157,14 @@ function animate() {
 	}
 	motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
 	camera.position.add(motion);
-	fireball.updateParticles()
-
+	
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
+
+	if (fireball) {
+		fireball.object.position.add(fireball.direction.clone().divideScalar(15))
+		fireball.updateParticles()
+	}
 }
 
 
