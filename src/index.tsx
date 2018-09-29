@@ -8,7 +8,7 @@ import Map from 'entities/Map';
 import GameState from 'entities/GameState';
 import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
 import Fireball from 'entities/Fireball';
-import { Direction } from 'entities/Character';
+import { directionToVector } from 'utils/directionToVector';
 
 const scene = new THREE.Scene();
 
@@ -61,24 +61,10 @@ document.addEventListener('keypress', event => {
 			fireball = null
 		}
 		fireball = new Fireball()
-		const position = new Vector3(0, 0, 0)
-		switch (character.facing) {
-			case Direction.North:
-				position.z = -1;
-				break;
-			case Direction.South:
-				position.z = 1;
-				break;
-			case Direction.East:
-				position.x = 1;
-				break;
-			case Direction.West:
-				position.x = -1;
-				break
-		}
-		fireball.direction = position.clone()
-		position.add(character.position)
-		fireball.object.position.set(position.x, 0.5, position.z)
+		const movementVector = directionToVector(character.facing)
+		fireball.direction = movementVector.clone()
+		movementVector.add(character.position)
+		fireball.object.position.set(movementVector.x, 0.5, movementVector.z)
 		scene.add(fireball.object)
 	}
 })
