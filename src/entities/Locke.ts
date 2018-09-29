@@ -1,7 +1,7 @@
 import Character, { Animation } from 'entities/Character'
 import { Frame } from './Frame';
 
-export default class CharacterLink extends Character {
+export default class CharacterLocke extends Character {
 	protected readonly frames: {
 		standing: Animation,
 		[name: string]: Animation
