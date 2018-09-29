@@ -12,6 +12,7 @@
 	  "object-literal-sort-keys": false,
 	  "no-bitwise": false,
 	  "no-shadowed-variable": false,
-	  "interface-name": false
+	  "interface-name": false,
+	  "no-debugger": false
   }
 }

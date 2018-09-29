@@ -13,7 +13,6 @@ export default class GameState {
 		x: 16,
 		y: 16
 	};
-	public path: ICoordinate[] = [];
 	public highlighted: ICoordinate | null = null;
 
 	public onMouseMove(event: MouseEvent) {

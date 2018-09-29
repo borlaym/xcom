@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Frame } from "./Frame";
 import { Vector2, Vector3 } from "three";
+import ICoordinate from "./Coordinate";
 
 export enum Direction {
 	North = 'n',
@@ -16,10 +17,18 @@ export interface Animation {
 	w: Frame[]
 }
 
+/**
+ * Number of milliseconds to walk a tile.
+ * Lower value means greater speed
+ */
+const SPEED = 400;
+
 export default abstract class Character {
 	public readonly collider: THREE.Object3D
 	public readonly sprite: THREE.Sprite
 	public facing: Direction = Direction.South
+	public path: ICoordinate[] = [];
+	public tilePosition: ICoordinate;
 	protected abstract readonly frames: {
 		standing: Animation,
 		[name: string]: Animation
@@ -68,6 +77,28 @@ export default abstract class Character {
 		this.collider = new THREE.Mesh(colliderGeometry, colliderMaterial);
 
 		this.loadSpriteSheet(spriteName)
+
+	}
+
+	public tick(d: number) {
+		if (this.path.length) {
+			this.setAnimation('walking')
+			const nextPath = this.path[0]
+			const [didReachTile, remainingDistance] = this.goTowardsTile(nextPath, d)
+			// If we could move more this tick and we can, do!
+			if (didReachTile) {
+				const reachedTile = this.path.shift()
+				if (reachedTile) {
+					this.tilePosition = reachedTile
+				}
+				if (this.path.length > 0 && remainingDistance > 0) {
+					this.goTowardsTile(this.path[0], remainingDistance)
+				}
+			}
+		} else {
+			this.setAnimation('standing')
+			this.updateFacing()
+		}
 	}
 
 	public moveTo(x: number, y: number, z: number) {
@@ -123,5 +154,23 @@ export default abstract class Character {
 		this.canvas.height = frame.h
 		this.ctx.drawImage(this.spriteMap, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h)
 		this.texture.needsUpdate = true
+	}
+
+	/**
+	 * Go in the direction of a designated tile.
+	 * If the movement would be greater than what it can go, returns the remaining distance
+	 * Otherwise returns 0
+	 */
+	private goTowardsTile(tile: ICoordinate, d: number): [boolean, number] {
+		const targetTile = new Vector3(tile.x, 0, tile.y);
+		const characterToTileVector = targetTile.clone().sub(this.sprite.position)
+		const distanceThisTick = d / SPEED;
+		const movementThisTick = characterToTileVector.clone().setLength(distanceThisTick);
+		if (movementThisTick.length() >= characterToTileVector.length()) {
+			this.move(characterToTileVector);
+			return [true, movementThisTick.length() - characterToTileVector.length()];
+		}
+		this.move(movementThisTick)
+		return [false, 0];
 	}
 }

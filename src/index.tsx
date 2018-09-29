@@ -12,6 +12,8 @@ import { directionToVector } from 'utils/directionToVector';
 
 const scene = new THREE.Scene();
 
+let lastTick: number = Date.now()
+
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.x = 16;
 camera.position.y = 4;
@@ -26,6 +28,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const character = new Locke(camera);
+character.tilePosition = { x: 16, y: 16}
 character.moveTo(16, 0, 16);
 
 let fireball: Fireball | null = null
@@ -73,9 +76,9 @@ document.addEventListener('click', () => {
 	if (state.highlighted) {
 		// Pathfinding
 		const graph = new Graph(map.mapData)
-		const start = graph.grid[state.characterPos.y][state.characterPos.x]
+		const start = graph.grid[character.tilePosition.y][character.tilePosition.x]
 		const end = graph.grid[state.highlighted.y][state.highlighted.x]
-		state.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
+		character.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
 	}
 });
 
@@ -86,6 +89,10 @@ const onMouseMove = (event: MouseEvent) => {
 document.addEventListener("mousemove", onMouseMove, false);
 
 function animate() {
+	const now = Date.now()
+	const d = now - lastTick
+	lastTick = now
+
 	const motion = state.motion
 
 	// Check for mouse pointing
@@ -108,31 +115,6 @@ function animate() {
 		state.highlighted = null
 	}
 
-	// Check for character movement
-	if (state.path.length) {
-		character.setAnimation('walking')
-		let nextPath = state.path[0]
-		if (character.position.x === nextPath.x && character.position.z === nextPath.y) {
-			const reachedCoordinate = state.path.shift()
-			if (reachedCoordinate) {
-				state.characterPos = reachedCoordinate
-			}
-			nextPath = state.path[0]
-		}
-		if (nextPath) {
-			const direction = new Vector3(nextPath.x, 0, nextPath.y).sub(character.position)
-			if (direction.length() < 0.10) {
-				character.move(direction)
-			} else {
-				direction.divideScalar(8)
-				character.move(direction)
-			}
-		}
-	} else {
-		character.setAnimation('standing')
-		character.updateFacing()
-	}
-
 	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
 		const cameraDirection = new Vector3()
 		camera.getWorldDirection(cameraDirection)
@@ -146,6 +128,8 @@ function animate() {
 	
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
+
+	character.tick(d);
 
 	if (fireball) {
 		fireball.object.position.add(fireball.direction.clone().divideScalar(12))
