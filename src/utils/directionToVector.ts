@@ -1,5 +1,5 @@
-import { Direction } from "entities/Character";
 import { Vector3 } from "three";
+import Direction from "../entities/Direction";
 
 export function directionToVector(direction: Direction) {
 	const position = new Vector3(0, 0, 0)

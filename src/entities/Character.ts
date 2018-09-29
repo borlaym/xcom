@@ -2,13 +2,7 @@ import * as THREE from "three";
 import { Frame } from "./Frame";
 import { Vector2, Vector3 } from "three";
 import ICoordinate from "./Coordinate";
-
-export enum Direction {
-	North = 'n',
-	East = 'e',
-	South = 's',
-	West = 'w'
-}
+import Direction from "./Direction";
 
 export interface Animation {
 	n: Frame[],
