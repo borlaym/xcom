@@ -109,8 +109,10 @@ export default abstract class Character {
 	public move(v: THREE.Vector3) {
 		this.sprite.position.add(v)
 		this.collider.position.add(v)
-		this.lastMovement = v
-		this.updateFacing(v)
+		if (v.length() !== 0) {
+			this.lastMovement = v
+			this.updateFacing(v)
+		}
 	}
 
 	public updateFacing(movementDirection: THREE.Vector3 = this.lastMovement) {
