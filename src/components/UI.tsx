@@ -4,7 +4,8 @@ import CharacterBar from "./CharacterBar";
 import styled from 'styled-components'
 
 interface Props {
-	characters: Character[]
+	characters: Character[],
+	activeCharacter: Character
 }
 
 const FloatingContainer = styled.ul`
@@ -21,7 +22,11 @@ export default class UI extends React.Component<Props> {
 		return (
 			<FloatingContainer>
 				{this.props.characters.map(character => (
-					<CharacterBar name={character.name} icon={character.icon} />
+					<CharacterBar
+						name={character.name}
+						icon={character.icon}
+						active={this.props.activeCharacter === character}
+					/>
 				))}
 			</FloatingContainer>
 		)

@@ -1,4 +1,3 @@
-import Locke from 'entities/Locke';
 import * as THREE from 'three';
 import { uniq } from 'lodash';
 import { astar, Graph } from './astar'
@@ -9,7 +8,6 @@ import GameState from 'entities/GameState';
 import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
 import Fireball from 'entities/Fireball';
 import { directionToVector } from 'utils/directionToVector';
-import CharacterSolider from 'entities/Soldier';
 import * as ReactDOM from 'react-dom';
 import UI from 'components/UI';
 import * as React from 'react';
@@ -31,17 +29,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const character = new Locke(camera);
-character.tilePosition = { x: 16, y: 16}
-character.moveTo(16, 0, 16);
 
-const soldier1 = new CharacterSolider(camera);
-soldier1.tilePosition = { x: 14, y: 14}
-soldier1.moveTo(14, 0, 14)
-
-const soldier2 = new CharacterSolider(camera);
-soldier2.tilePosition = { x: 18, y: 6 }
-soldier2.moveTo(18, 0, 6)
 
 let fireball: Fireball | null = null
 
@@ -52,19 +40,13 @@ const globalIllumination = new THREE.AmbientLight(0xffffff, 0.4)
 scene.add(globalIllumination)
 
 function start() {
-	scene.add(character.sprite)
 	map.tiles.forEach(tile => scene.add(tile.mesh))
 	map.lights.forEach(light => scene.add(light))
-	character.sprite.lookAt(camera.position)
 	animate();
 }
 
-
 const state = new GameState()
-
-state.characters = [soldier1, soldier2]
-scene.add(soldier1.sprite)
-scene.add(soldier2.sprite)
+state.init(camera, scene)
 
 document.addEventListener('keydown', (event) => {
 	state.keysDown = uniq(state.keysDown.concat(event.key));
@@ -81,9 +63,9 @@ document.addEventListener('keypress', event => {
 			fireball = null
 		}
 		fireball = new Fireball()
-		const movementVector = directionToVector(character.facing)
+		const movementVector = directionToVector(state.activeCharacter.facing)
 		fireball.direction = movementVector.clone()
-		movementVector.add(character.position)
+		movementVector.add(state.activeCharacter.position)
 		fireball.object.position.set(movementVector.x, 0.5, movementVector.z)
 		scene.add(fireball.object)
 	}
@@ -93,9 +75,9 @@ document.addEventListener('click', () => {
 	if (state.highlighted) {
 		// Pathfinding
 		const graph = new Graph(map.mapData)
-		const start = graph.grid[character.tilePosition.y][character.tilePosition.x]
+		const start = graph.grid[state.activeCharacter.tilePosition.y][state.activeCharacter.tilePosition.x]
 		const end = graph.grid[state.highlighted.y][state.highlighted.x]
-		character.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
+		state.activeCharacter.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
 	}
 });
 
@@ -146,7 +128,7 @@ function animate() {
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
 
-	character.tick(d);
+	state.tick(d);
 
 	if (fireball) {
 		fireball.object.position.add(fireball.direction.clone().divideScalar(12))
@@ -158,6 +140,6 @@ const reactRoot = document.createElement('div')
 document.body.appendChild(reactRoot)
 
 ReactDOM.render(
-	<UI characters={[character, ...state.characters]} />,
+	<UI characters={state.characters} activeCharacter={state.activeCharacter} />,
 	reactRoot
 )
