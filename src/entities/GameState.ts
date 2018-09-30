@@ -1,9 +1,10 @@
 import ICoordinate from "./Coordinate";
-import { Vector3, Camera, Scene } from "three";
+import { Vector3, Scene } from "three";
 import Character from "./Character";
 import CharacterSolider from "./Soldier";
 import CharacterLocke from "./Locke";
 import { EventEmitter } from "events";
+import GameCamera from "./GameCamera";
 
 const SPEED = 0.1;
 
@@ -17,6 +18,8 @@ export default class GameState extends EventEmitter {
 	public characters: Character[]
 	public activeCharacter: Character
 	public canAct: boolean = true;
+
+	private gameCamera: GameCamera
 
 	public onMouseMove(event: MouseEvent) {
 		this.mousePos.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -40,16 +43,16 @@ export default class GameState extends EventEmitter {
 		return motion
 	}
 
-	public init(camera: Camera, scene: Scene) {
-		const character = new CharacterLocke(camera);
+	public init(camera: GameCamera, scene: Scene) {
+		const character = new CharacterLocke(camera.camera);
 		character.tilePosition = { x: 16, y: 16 }
 		character.moveTo(16, 0, 16);
 
-		const soldier1 = new CharacterSolider(camera);
+		const soldier1 = new CharacterSolider(camera.camera);
 		soldier1.tilePosition = { x: 14, y: 14 }
 		soldier1.moveTo(14, 0, 14)
 
-		const soldier2 = new CharacterSolider(camera);
+		const soldier2 = new CharacterSolider(camera.camera);
 		soldier2.tilePosition = { x: 18, y: 6 }
 		soldier2.moveTo(18, 0, 6)
 
@@ -63,6 +66,8 @@ export default class GameState extends EventEmitter {
 		this.characters.forEach(character => character.on('finishedMoving', () => {
 			this.nextCharacter()
 		}))
+
+		this.gameCamera = camera
 	}
 
 	public tick(d: number) {
@@ -75,6 +80,7 @@ export default class GameState extends EventEmitter {
 		const nextIndex = activeCharacterIndex === this.characters.length - 1 ? 0 : activeCharacterIndex + 1;
 		this.activeCharacter = this.characters[nextIndex]
 		this.canAct = true;
+		this.gameCamera.focus(this.activeCharacter.sprite)
 		this.emit('updateUI')
 	}
 }

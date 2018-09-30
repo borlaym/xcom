@@ -11,25 +11,17 @@ import { directionToVector } from 'utils/directionToVector';
 import * as ReactDOM from 'react-dom';
 import UI from 'components/UI';
 import * as React from 'react';
+import GameCamera from 'entities/GameCamera';
 
 const scene = new THREE.Scene();
 
 let lastTick: number = Date.now()
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.x = 16;
-camera.position.y = 4;
-camera.position.z = 18;
-camera.rotation.x = -Math.PI / 3
-camera.rotation.y = 0;
-camera.rotation.z = 0;
-camera.rotation.order = 'YXZ'
-
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-
+const camera = new GameCamera()
 
 let fireball: Fireball | null = null
 
@@ -103,7 +95,7 @@ function animate() {
 	map.tiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
 	if (state.canAct) {
 		const mouseRaycaster = new THREE.Raycaster();
-		mouseRaycaster.setFromCamera(state.mousePos, camera)
+		mouseRaycaster.setFromCamera(state.mousePos, camera.camera)
 		const intersects = mouseRaycaster.intersectObjects(map.tiles.map(t => t.mesh))
 		if (intersects.length === 1) {
 			const intersection = intersects[0]
@@ -123,17 +115,17 @@ function animate() {
 
 	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
 		const cameraDirection = new Vector3()
-		camera.getWorldDirection(cameraDirection)
+		camera.camera.getWorldDirection(cameraDirection)
 		const cameraLookingAt = new Vector3()
-		new THREE.Ray(camera.position, cameraDirection).intersectPlane(new THREE.Plane(new Vector3(0, 1, 0)), cameraLookingAt)
+		new THREE.Ray(camera.camera.position, cameraDirection).intersectPlane(new THREE.Plane(new Vector3(0, 1, 0)), cameraLookingAt)
 		const rotation = state.keysDown.indexOf('q') > -1 ? -0.05 : 0.05
-		rotateCameraAboutPoint(camera, cameraLookingAt, new Vector3(0, 1, 0), rotation)
+		rotateCameraAboutPoint(camera.camera, cameraLookingAt, new Vector3(0, 1, 0), rotation)
 	}
-	motion.applyEuler(new THREE.Euler(0, camera.rotation.y, 0));
-	camera.position.add(motion);
+	motion.applyEuler(new THREE.Euler(0, camera.camera.rotation.y, 0));
+	camera.camera.position.add(motion);
 	
 	requestAnimationFrame(animate);
-	renderer.render(scene, camera);
+	renderer.render(scene, camera.camera);
 
 	state.tick(d);
 
