@@ -47,6 +47,9 @@ function start() {
 
 const state = new GameState()
 state.init(camera, scene)
+state.on('updateUI', () => {
+	renderUI()
+})
 
 document.addEventListener('keydown', (event) => {
 	state.keysDown = uniq(state.keysDown.concat(event.key));
@@ -72,12 +75,14 @@ document.addEventListener('keypress', event => {
 })
 
 document.addEventListener('click', () => {
-	if (state.highlighted) {
+	if (state.highlighted && state.canAct) {
 		// Pathfinding
 		const graph = new Graph(map.mapData)
 		const start = graph.grid[state.activeCharacter.tilePosition.y][state.activeCharacter.tilePosition.x]
 		const end = graph.grid[state.highlighted.y][state.highlighted.x]
 		state.activeCharacter.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
+		state.canAct = false
+
 	}
 });
 
@@ -139,7 +144,12 @@ function animate() {
 const reactRoot = document.createElement('div')
 document.body.appendChild(reactRoot)
 
-ReactDOM.render(
-	<UI characters={state.characters} activeCharacter={state.activeCharacter} />,
-	reactRoot
-)
+function renderUI() {
+	ReactDOM.render(
+		<UI characters={state.characters} activeCharacter={state.activeCharacter} />,
+		reactRoot
+	)
+}
+
+
+renderUI()

@@ -3,22 +3,20 @@ import { Vector3, Camera, Scene } from "three";
 import Character from "./Character";
 import CharacterSolider from "./Soldier";
 import CharacterLocke from "./Locke";
+import { EventEmitter } from "events";
 
 const SPEED = 0.1;
 
-export default class GameState {
+export default class GameState extends EventEmitter {
 	public keysDown: string[] = []
 	public mousePos: ICoordinate = {
 		x: 0,
 		y: 0
 	};
-	public characterPos: ICoordinate = {
-		x: 16,
-		y: 16
-	};
 	public highlighted: ICoordinate | null = null;
 	public characters: Character[]
 	public activeCharacter: Character
+	public canAct: boolean = true;
 
 	public onMouseMove(event: MouseEvent) {
 		this.mousePos.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -61,9 +59,22 @@ export default class GameState {
 		scene.add(soldier2.sprite)
 
 		this.activeCharacter = character
+
+		this.characters.forEach(character => character.on('finishedMoving', () => {
+			this.nextCharacter()
+		}))
 	}
 
 	public tick(d: number) {
 		this.characters.forEach(character => character.tick(d))
+	}
+
+	private nextCharacter() {
+		console.log('nextcharacter')
+		const activeCharacterIndex = this.characters.indexOf(this.activeCharacter)
+		const nextIndex = activeCharacterIndex === this.characters.length - 1 ? 0 : activeCharacterIndex + 1;
+		this.activeCharacter = this.characters[nextIndex]
+		this.canAct = true;
+		this.emit('updateUI')
 	}
 }

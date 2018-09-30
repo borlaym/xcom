@@ -3,6 +3,7 @@ import { Frame } from "./Frame";
 import { Vector2, Vector3 } from "three";
 import ICoordinate from "./Coordinate";
 import Direction from "./Direction";
+import { EventEmitter } from "events";
 export interface Animation {
 	n: Frame[],
 	e: Frame[],
@@ -16,7 +17,7 @@ export interface Animation {
  */
 const SPEED = 400;
 
-export default abstract class Character {
+export default abstract class Character extends EventEmitter {
 	public abstract readonly name: string
 	public abstract readonly icon: string
 	public readonly collider: THREE.Object3D
@@ -40,6 +41,7 @@ export default abstract class Character {
 		spriteName: string,
 		private readonly camera: THREE.Camera
 	) {
+		super()
 		this.canvas = document.createElement('canvas')
 		const ctx = this.canvas.getContext('2d')
 		if (!ctx) {
@@ -88,6 +90,9 @@ export default abstract class Character {
 				}
 				if (this.path.length > 0 && remainingDistance > 0) {
 					this.goTowardsTile(this.path[0], remainingDistance)
+				}
+				if (this.path.length === 0) {
+					this.emit('finishedMoving')
 				}
 			}
 		} else {
