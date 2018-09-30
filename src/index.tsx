@@ -101,22 +101,24 @@ function animate() {
 
 	// Check for mouse pointing
 	map.tiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
-	const mouseRaycaster = new THREE.Raycaster();
-	mouseRaycaster.setFromCamera(state.mousePos, camera)
-	const intersects = mouseRaycaster.intersectObjects(map.tiles.map(t => t.mesh))
-	if (intersects.length === 1) {
-		const intersection = intersects[0]
-		const uuid = intersection.object.uuid
-		const floor = map.tiles.find(tile => tile.uuid === uuid)
-		if (floor && floor instanceof Floor) {
-			floor.highlight()
-			state.highlighted = {
-				x: floor.col,
-				y: floor.row
+	if (state.canAct) {
+		const mouseRaycaster = new THREE.Raycaster();
+		mouseRaycaster.setFromCamera(state.mousePos, camera)
+		const intersects = mouseRaycaster.intersectObjects(map.tiles.map(t => t.mesh))
+		if (intersects.length === 1) {
+			const intersection = intersects[0]
+			const uuid = intersection.object.uuid
+			const floor = map.tiles.find(tile => tile.uuid === uuid)
+			if (floor && floor instanceof Floor) {
+				floor.highlight()
+				state.highlighted = {
+					x: floor.col,
+					y: floor.row
+				}
 			}
+		} else {
+			state.highlighted = null
 		}
-	} else {
-		state.highlighted = null
 	}
 
 	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
