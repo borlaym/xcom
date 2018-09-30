@@ -10,6 +10,9 @@ import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
 import Fireball from 'entities/Fireball';
 import { directionToVector } from 'utils/directionToVector';
 import CharacterSolider from 'entities/Soldier';
+import * as ReactDOM from 'react-dom';
+import UI from 'components/UI';
+import * as React from 'react';
 
 const scene = new THREE.Scene();
 
@@ -151,4 +154,10 @@ function animate() {
 	}
 }
 
+const reactRoot = document.createElement('div')
+document.body.appendChild(reactRoot)
 
+ReactDOM.render(
+	<UI characters={[character, ...state.characters]} />,
+	reactRoot
+)

@@ -2,6 +2,8 @@ import Character, { Animation } from 'entities/Character'
 import { Frame } from './Frame';
 
 export default class CharacterLocke extends Character {
+	public name: string = "Locke";
+	public icon: string = "icons/locke.png";
 	protected readonly frames: {
 		standing: Animation,
 		[name: string]: Animation

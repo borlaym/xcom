@@ -3,7 +3,6 @@ import { Frame } from "./Frame";
 import { Vector2, Vector3 } from "three";
 import ICoordinate from "./Coordinate";
 import Direction from "./Direction";
-
 export interface Animation {
 	n: Frame[],
 	e: Frame[],
@@ -18,6 +17,8 @@ export interface Animation {
 const SPEED = 400;
 
 export default abstract class Character {
+	public abstract readonly name: string
+	public abstract readonly icon: string
 	public readonly collider: THREE.Object3D
 	public readonly sprite: THREE.Sprite
 	public facing: Direction = Direction.South
