@@ -1,9 +1,10 @@
 import * as THREE from "three";
 import { Frame } from "./Frame";
-import { Vector3 } from "three";
+import { Vector3, Vector2 } from "three";
 import ICoordinate from "./Coordinate";
-import Direction from "./Direction";
 import Movable from "./Movable";
+import { directionToVector } from "../utils/directionToVector";
+import vectorToDirection from "../utils/vectorToDirection";
 export interface Animation {
 	n: Frame[],
 	e: Frame[],
@@ -16,7 +17,6 @@ export default abstract class Character extends Movable {
 	public abstract readonly icon: string
 	public readonly collider: THREE.Object3D
 	public readonly sprite: THREE.Sprite
-	public facing: Direction = Direction.South
 	public path: ICoordinate[] = [];
 	public tilePosition: ICoordinate;
 	protected abstract readonly frames: {
@@ -88,7 +88,6 @@ export default abstract class Character extends Movable {
 	}
 
 	public updateFacing() {
-		this.facing = this.movementDirection
 		this.applySprite(this.frame)
 	}
 
@@ -108,6 +107,12 @@ export default abstract class Character extends Movable {
 	
 	public get camera() {
 		return this.gameCamera
+	}
+
+	public get facing() {
+		const directionVector = directionToVector(this.movementDirection)
+		const cameraAdjustedDirection = (new Vector2(directionVector.x, -directionVector.z)).rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
+		return vectorToDirection(cameraAdjustedDirection)
 	}
 
 	private get frameSet(): Frame[] {

@@ -1,4 +1,4 @@
-import { Vector3, Vector2, Camera } from "three";
+import { Vector3, Vector2 } from "three";
 import { EventEmitter } from "events";
 import Direction from "./Direction";
 import vectorToDirection from "utils/vectorToDirection";
@@ -13,7 +13,6 @@ interface Movement {
 export default abstract class Movable extends EventEmitter {
 	abstract get position(): Vector3
 	abstract set position(v: Vector3)
-	abstract get camera(): Camera
 	protected movementDirection: Direction = Direction.South
 	private movement: Movement | null = null
 
@@ -24,10 +23,8 @@ export default abstract class Movable extends EventEmitter {
 			duration,
 			progress: 0
 		}
-
 		const movementDirection = to.clone().sub(this.position.clone())
-		const cameraAdjustedDirection = (new Vector2(movementDirection.x, -movementDirection.z)).rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
-		this.movementDirection = vectorToDirection(cameraAdjustedDirection)
+		this.movementDirection = vectorToDirection(new Vector2(movementDirection.x, -movementDirection.z))
 	}
 
 	protected _movementTick(d: number) {

@@ -23,6 +23,7 @@ export default class UI extends React.Component<Props> {
 			<FloatingContainer>
 				{this.props.characters.map(character => (
 					<CharacterBar
+						key={character.collider.uuid}
 						name={character.name}
 						icon={character.icon}
 						active={this.props.activeCharacter === character}
