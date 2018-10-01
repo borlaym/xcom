@@ -35,8 +35,10 @@ export default abstract class Movable extends EventEmitter {
 			const progress = Math.min(this.movement.progress + d, this.movement.duration)
 			const leftOver = this.movement.progress + d - this.movement.duration
 			this.movement.progress = progress
-			const pos = this.position.clone().lerp(this.movement.endPos, progress / this.movement.duration)
-			this.position = pos
+			const movementDirection = this.movement.endPos.clone().sub(this.movement.startPos.clone())
+			const entireMovementLength = movementDirection.length()
+			movementDirection.setLength(entireMovementLength * (progress / this.movement.duration))
+			this.position = this.movement.startPos.clone().add(movementDirection)
 			if (this.movement.progress === this.movement.duration) {
 				this.movement = null;
 				this.emit('finishedTransition', leftOver)
