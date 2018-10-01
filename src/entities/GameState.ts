@@ -46,15 +46,15 @@ export default class GameState extends EventEmitter {
 	public init(camera: GameCamera, scene: Scene) {
 		const character = new CharacterLocke(camera.camera);
 		character.tilePosition = { x: 16, y: 16 }
-		character.moveTo(16, 0, 16);
+		character.position = new Vector3(16, 0, 16);
 
 		const soldier1 = new CharacterSolider(camera.camera);
 		soldier1.tilePosition = { x: 14, y: 14 }
-		soldier1.moveTo(14, 0, 14)
+		soldier1.position = new Vector3(14, 0, 14)
 
 		const soldier2 = new CharacterSolider(camera.camera);
 		soldier2.tilePosition = { x: 18, y: 6 }
-		soldier2.moveTo(18, 0, 6)
+		soldier2.position = new Vector3(18, 0, 6)
 
 		this.characters = [character, soldier1, soldier2]
 		scene.add(character.sprite)
@@ -75,7 +75,6 @@ export default class GameState extends EventEmitter {
 	}
 
 	private nextCharacter() {
-		console.log('nextcharacter')
 		const activeCharacterIndex = this.characters.indexOf(this.activeCharacter)
 		const nextIndex = activeCharacterIndex === this.characters.length - 1 ? 0 : activeCharacterIndex + 1;
 		this.activeCharacter = this.characters[nextIndex]

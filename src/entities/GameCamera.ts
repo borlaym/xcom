@@ -21,6 +21,10 @@ export default class GameCamera extends Movable {
 		return this.camera.position
 	}
 
+	set position(v: Vector3) {
+		this.camera.position.set(v.x, v.y, v.z)
+	}
+
 	public focus(object: Object3D) {
 		const movement = object.position.clone().sub(this.lookingAt)
 		this.moveTo(this.camera.position.clone().add(movement))

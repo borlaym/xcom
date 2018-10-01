@@ -72,7 +72,7 @@ document.addEventListener('click', () => {
 		const graph = new Graph(map.mapData)
 		const start = graph.grid[state.activeCharacter.tilePosition.y][state.activeCharacter.tilePosition.x]
 		const end = graph.grid[state.highlighted.y][state.highlighted.x]
-		state.activeCharacter.path = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
+		state.activeCharacter.walkPath(astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x })))
 		state.canAct = false
 
 	}

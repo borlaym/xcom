@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { Frame } from "./Frame";
-import { Vector2, Vector3 } from "three";
+import { Vector3 } from "three";
 import ICoordinate from "./Coordinate";
 import Direction from "./Direction";
-import { EventEmitter } from "events";
+import Movable from "./Movable";
 export interface Animation {
 	n: Frame[],
 	e: Frame[],
@@ -11,13 +11,7 @@ export interface Animation {
 	w: Frame[]
 }
 
-/**
- * Number of milliseconds to walk a tile.
- * Lower value means greater speed
- */
-const SPEED = 400;
-
-export default abstract class Character extends EventEmitter {
+export default abstract class Character extends Movable {
 	public abstract readonly name: string
 	public abstract readonly icon: string
 	public readonly collider: THREE.Object3D
@@ -36,10 +30,9 @@ export default abstract class Character extends EventEmitter {
 	private readonly ctx: CanvasRenderingContext2D
 	private spriteMap: HTMLImageElement
 	private readonly texture: THREE.Texture
-	private lastMovement: THREE.Vector3 = new Vector3(0, 0, 1);
 	constructor(
 		spriteName: string,
-		private readonly camera: THREE.Camera
+		private readonly gameCamera: THREE.Camera
 	) {
 		super()
 		this.canvas = document.createElement('canvas')
@@ -74,54 +67,28 @@ export default abstract class Character extends EventEmitter {
 		this.collider = new THREE.Mesh(colliderGeometry, colliderMaterial);
 
 		this.loadSpriteSheet(spriteName)
-
+		this.on('finishedTransition', () => this.finishedMovement())
 	}
 
 	public tick(d: number) {
+		this._movementTick(d)
 		if (this.path.length) {
 			this.setAnimation('walking')
-			const nextPath = this.path[0]
-			const [didReachTile, remainingDistance] = this.goTowardsTile(nextPath, d)
-			// If we could move more this tick and we can, do!
-			if (didReachTile) {
-				const reachedTile = this.path.shift()
-				if (reachedTile) {
-					this.tilePosition = reachedTile
-				}
-				if (this.path.length > 0 && remainingDistance > 0) {
-					this.goTowardsTile(this.path[0], remainingDistance)
-				}
-				if (this.path.length === 0) {
-					this.emit('finishedMoving')
-				}
-			}
+			this.updateFacing()
 		} else {
 			this.setAnimation('standing')
 			this.updateFacing()
 		}
 	}
 
-	public moveTo(x: number, y: number, z: number) {
-		this.sprite.position.set(x, y, z)
-		this.collider.position.set(x, y, z)
+	public walkPath(path: ICoordinate[]) {
+		this.path = path
+		const firstTile = path[0]
+		this.moveTo(new Vector3(firstTile.x, 0, firstTile.y), 400)
 	}
 
-	public move(v: THREE.Vector3) {
-		this.sprite.position.add(v)
-		this.collider.position.add(v)
-		if (v.length() !== 0) {
-			this.lastMovement = v
-			this.updateFacing(v)
-		}
-	}
-
-	public updateFacing(movementDirection: THREE.Vector3 = this.lastMovement) {
-		// Change facing
-		const cameraAdjustedDirection = (new Vector2(movementDirection.x, -movementDirection.z)).rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
-		const angle = cameraAdjustedDirection.angle()
-		const index = Math.round((((angle < 0 ? angle + 2 * Math.PI : angle)) / (Math.PI / 2))) % 4
-		this.facing = [Direction.East, Direction.North, Direction.West, Direction.South][index]
-
+	public updateFacing() {
+		this.facing = this.movementDirection
 		this.applySprite(this.frame)
 	}
 
@@ -134,8 +101,31 @@ export default abstract class Character extends EventEmitter {
 		return this.collider.position
 	}
 
+	public set position(v: Vector3) {
+		this.collider.position.set(v.x, v.y, v.z)
+		this.sprite.position.set(v.x, v.y, v.z)
+	}
+	
+	public get camera() {
+		return this.gameCamera
+	}
+
 	private get frameSet(): Frame[] {
 		return this.frames[this.animation][this.facing]
+	}
+
+	private finishedMovement() {
+		const reachedTile = this.path.shift()
+		if (reachedTile) {
+			this.tilePosition = reachedTile
+		}
+		if (this.path.length > 0) {
+			const firstTile = this.path[0]
+			this.moveTo(new Vector3(firstTile.x, 0, firstTile.y), 400)
+		}
+		if (this.path.length === 0) {
+			this.emit('finishedMoving')
+		}
 	}
 
 	private get frame(): Frame {
@@ -158,21 +148,4 @@ export default abstract class Character extends EventEmitter {
 		this.texture.needsUpdate = true
 	}
 
-	/**
-	 * Go in the direction of a designated tile.
-	 * If the movement would be greater than what it can go, returns the remaining distance
-	 * Otherwise returns 0
-	 */
-	private goTowardsTile(tile: ICoordinate, d: number): [boolean, number] {
-		const targetTile = new Vector3(tile.x, 0, tile.y);
-		const characterToTileVector = targetTile.clone().sub(this.sprite.position)
-		const distanceThisTick = d / SPEED;
-		const movementThisTick = characterToTileVector.clone().setLength(distanceThisTick);
-		if (movementThisTick.length() >= characterToTileVector.length()) {
-			this.move(characterToTileVector);
-			return [true, movementThisTick.length() - characterToTileVector.length()];
-		}
-		this.move(movementThisTick)
-		return [false, 0];
-	}
 }
