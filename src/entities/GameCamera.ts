@@ -1,6 +1,7 @@
 import { Camera, Object3D, Vector3 } from "three";
 import * as THREE from "three";
 import Movable from "./Movable";
+import rotateAroundPoint from "utils/rotateAroundPoint";
 
 export default class GameCamera extends Movable {
 	public camera: Camera;
@@ -38,9 +39,22 @@ export default class GameCamera extends Movable {
 		return cameraLookingAt
 	}
 
+	public rotateLeft() {
+		this.rotate(-0.05)
+	}
+
+	public rotateRight() {
+		this.rotate(0.05)
+	}
+	
 	public tick(d: number) {
 		this._movementTick(d)
 	}
+
+	private rotate(rotation: number) {
+		rotateAroundPoint(this.camera, this.lookingAt, new Vector3(0, 1, 0), rotation)
+	}
+
 
 	
 

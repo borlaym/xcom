@@ -1,11 +1,9 @@
 import * as THREE from 'three';
 import { uniq } from 'lodash';
 import { astar, Graph } from './astar'
-import { Vector3 } from 'three';
 import Floor from 'entities/Floor';
 import Map from 'entities/Map';
 import GameState from 'entities/GameState';
-import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
 import * as ReactDOM from 'react-dom';
 import UI from 'components/UI';
 import * as React from 'react';
@@ -94,22 +92,21 @@ function animate() {
 		}
 	}
 
-	if (state.keysDown.indexOf('q') > -1 || state.keysDown.indexOf('e') > -1) {
-		const cameraDirection = new Vector3()
-		camera.camera.getWorldDirection(cameraDirection)
-		const cameraLookingAt = new Vector3()
-		new THREE.Ray(camera.camera.position, cameraDirection).intersectPlane(new THREE.Plane(new Vector3(0, 1, 0)), cameraLookingAt)
-		const rotation = state.keysDown.indexOf('q') > -1 ? -0.05 : 0.05
-		rotateCameraAboutPoint(camera.camera, cameraLookingAt, new Vector3(0, 1, 0), rotation)
+	if (state.keysDown.indexOf('q') > -1) {
+		camera.rotateLeft()
+	} 
+	if (state.keysDown.indexOf('e') > -1) {
+		camera.rotateRight()
 	}
 	motion.applyEuler(new THREE.Euler(0, camera.camera.rotation.y, 0));
 	camera.camera.position.add(motion);
 	
-	requestAnimationFrame(animate);
-	renderer.render(scene, camera.camera);
-
 	state.tick(d);
 	camera.tick(d);
+
+	renderer.render(scene, camera.camera);
+	requestAnimationFrame(animate);
+
 
 }
 
