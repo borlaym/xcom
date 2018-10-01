@@ -1,9 +1,19 @@
 import { Camera, Object3D, Vector3 } from "three";
 import * as THREE from "three";
+import { EventEmitter } from "events";
 
-export default class GameCamera {
+interface Movement {
+	startPos: Vector3,
+	endPos: Vector3,
+	duration: number,
+	progress: number
+}
+
+export default class GameCamera extends EventEmitter {
 	public camera: Camera;
+	private movement: Movement | null = null
 	constructor() {
+		super()
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 		this.camera.position.x = 16;
 		this.camera.position.y = 4;
@@ -15,11 +25,38 @@ export default class GameCamera {
 	}
 
 	public focus(object: Object3D) {
+		const movement = object.position.clone().sub(this.lookingAt)
+		this.moveTo(this.camera.position.clone().add(movement))
+	}
+
+	public get lookingAt(): Vector3 {
 		const cameraDirection = new Vector3()
 		this.camera.getWorldDirection(cameraDirection)
 		const cameraLookingAt = new Vector3()
 		new THREE.Ray(this.camera.position, cameraDirection).intersectPlane(new THREE.Plane(new Vector3(0, 1, 0)), cameraLookingAt)
-		const movement = object.position.clone().sub(cameraLookingAt)
-		this.camera.position.add(movement)
+		return cameraLookingAt
 	}
+
+	public moveTo(to: Vector3) {
+		this.movement = {
+			startPos: this.camera.position.clone(),
+			endPos: to,
+			duration: 300,
+			progress: 0
+		}
+		console.log(this.movement)
+	}
+
+	public tick(d: number) {
+		if (this.movement) {
+			this.movement.progress = Math.min(this.movement.progress + d, this.movement.duration)
+			const pos = this.camera.position.clone().lerp(this.movement.endPos, this.movement.progress / this.movement.duration)
+			this.camera.position.set(pos.x, pos.y, pos.z)
+			if (this.movement.progress === this.movement.duration) {
+				this.movement = null;
+				this.emit('finishedMoving')
+			}
+		}
+	}
+
 }

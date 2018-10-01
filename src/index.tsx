@@ -128,6 +128,7 @@ function animate() {
 	renderer.render(scene, camera.camera);
 
 	state.tick(d);
+	camera.tick(d);
 
 	if (fireball) {
 		fireball.object.position.add(fireball.direction.clone().divideScalar(12))
