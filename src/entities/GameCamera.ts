@@ -1,17 +1,10 @@
 import { Camera, Object3D, Vector3 } from "three";
 import * as THREE from "three";
-import { EventEmitter } from "events";
+import Movable from "./Movable";
 
-interface Movement {
-	startPos: Vector3,
-	endPos: Vector3,
-	duration: number,
-	progress: number
-}
-
-export default class GameCamera extends EventEmitter {
+export default class GameCamera extends Movable {
 	public camera: Camera;
-	private movement: Movement | null = null
+	
 	constructor() {
 		super()
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -22,6 +15,10 @@ export default class GameCamera extends EventEmitter {
 		this.camera.rotation.y = 0;
 		this.camera.rotation.z = 0;
 		this.camera.rotation.order = 'YXZ'
+	}
+
+	get position() {
+		return this.camera.position
 	}
 
 	public focus(object: Object3D) {
@@ -37,26 +34,10 @@ export default class GameCamera extends EventEmitter {
 		return cameraLookingAt
 	}
 
-	public moveTo(to: Vector3) {
-		this.movement = {
-			startPos: this.camera.position.clone(),
-			endPos: to,
-			duration: 300,
-			progress: 0
-		}
-		console.log(this.movement)
+	public tick(d: number) {
+		this._movementTick(d)
 	}
 
-	public tick(d: number) {
-		if (this.movement) {
-			this.movement.progress = Math.min(this.movement.progress + d, this.movement.duration)
-			const pos = this.camera.position.clone().lerp(this.movement.endPos, this.movement.progress / this.movement.duration)
-			this.camera.position.set(pos.x, pos.y, pos.z)
-			if (this.movement.progress === this.movement.duration) {
-				this.movement = null;
-				this.emit('finishedMoving')
-			}
-		}
-	}
+	
 
 }
