@@ -67,7 +67,7 @@ export default abstract class Character extends Movable {
 		this.collider = new THREE.Mesh(colliderGeometry, colliderMaterial);
 
 		this.loadSpriteSheet(spriteName)
-		this.on('finishedTransition', () => this.finishedMovement())
+		this.on('finishedTransition', (leftOver) => this.finishedMovement(leftOver))
 	}
 
 	public tick(d: number) {
@@ -114,7 +114,7 @@ export default abstract class Character extends Movable {
 		return this.frames[this.animation][this.facing]
 	}
 
-	private finishedMovement() {
+	private finishedMovement(leftOver: number) {
 		const reachedTile = this.path.shift()
 		if (reachedTile) {
 			this.tilePosition = reachedTile
@@ -122,6 +122,9 @@ export default abstract class Character extends Movable {
 		if (this.path.length > 0) {
 			const firstTile = this.path[0]
 			this.moveTo(new Vector3(firstTile.x, 0, firstTile.y), 400)
+		}
+		if (leftOver) {
+			this._movementTick(leftOver)
 		}
 		if (this.path.length === 0) {
 			this.emit('finishedMoving')
