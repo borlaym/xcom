@@ -26,7 +26,7 @@ export default class GameState extends EventEmitter {
 		this.mousePos.y = - (event.clientY / window.innerHeight) * 2 + 1;
 	}
 
-	public get motion(): Vector3 {
+	public get cameraMotion(): Vector3 {
 		const motion = new Vector3(0, 0, 0);
 		if (this.keysDown.indexOf('w') > -1) {
 			motion.z -= SPEED;

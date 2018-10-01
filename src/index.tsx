@@ -68,7 +68,7 @@ function animate() {
 	const d = now - lastTick
 	lastTick = now
 
-	const motion = state.motion
+	const cameraMotion = state.cameraMotion
 
 	// Check for mouse pointing
 	map.tiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
@@ -98,8 +98,8 @@ function animate() {
 	if (state.keysDown.indexOf('e') > -1) {
 		camera.rotateRight()
 	}
-	motion.applyEuler(new THREE.Euler(0, camera.camera.rotation.y, 0));
-	camera.camera.position.add(motion);
+	cameraMotion.applyEuler(new THREE.Euler(0, camera.camera.rotation.y, 0));
+	camera.camera.position.add(cameraMotion);
 	
 	state.tick(d);
 	camera.tick(d);
