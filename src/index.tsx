@@ -6,8 +6,6 @@ import Floor from 'entities/Floor';
 import Map from 'entities/Map';
 import GameState from 'entities/GameState';
 import rotateCameraAboutPoint from 'utils/rotateCameraAboutPoint';
-import Fireball from 'entities/Fireball';
-import { directionToVector } from 'utils/directionToVector';
 import * as ReactDOM from 'react-dom';
 import UI from 'components/UI';
 import * as React from 'react';
@@ -22,8 +20,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const camera = new GameCamera()
-
-let fireball: Fireball | null = null
 
 const map = new Map('test')
 map.loaded.then(start)
@@ -50,21 +46,6 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('keyup', (event) => {
 	state.keysDown = state.keysDown.filter(key => key !== event.key);
 });
-
-document.addEventListener('keypress', event => {
-	if (event.code === 'Space') {
-		if (fireball) {
-			scene.remove(fireball.object)
-			fireball = null
-		}
-		fireball = new Fireball()
-		const movementVector = directionToVector(state.activeCharacter.facing)
-		fireball.direction = movementVector.clone()
-		movementVector.add(state.activeCharacter.position)
-		fireball.object.position.set(movementVector.x, 0.5, movementVector.z)
-		scene.add(fireball.object)
-	}
-})
 
 document.addEventListener('click', () => {
 	if (state.highlighted && state.canAct) {
@@ -130,10 +111,6 @@ function animate() {
 	state.tick(d);
 	camera.tick(d);
 
-	if (fireball) {
-		fireball.object.position.add(fireball.direction.clone().divideScalar(12))
-		fireball.updateParticles()
-	}
 }
 
 const reactRoot = document.createElement('div')
