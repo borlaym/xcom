@@ -78,10 +78,12 @@ function animate() {
 	map.tiles.forEach(tile => {
 		if (tile instanceof Floor) {
 			tile.removeHighlight()
-			const tileSelectable = state.movableSpaces.find(space => space.x === tile.col && space.y === tile.row)
-			if (tileSelectable) {
-				tile.selectable()
-			} 
+			if (state.canAct) {
+				const tileSelectable = state.selectableSpaces.find(space => space.x === tile.col && space.y === tile.row)
+				if (tileSelectable) {
+					tile.selectable()
+				} 
+			}
 		}
 	})
 	if (state.canAct) {
