@@ -48,11 +48,19 @@ document.addEventListener('keyup', (event) => {
 document.addEventListener('click', () => {
 	if (state.highlighted && state.canAct) {
 		// Pathfinding
-		const graph = new Graph(map.mapData)
+		const mapData = JSON.parse(JSON.stringify(map.mapData))
+		state.characters.forEach(character => {
+			mapData[character.tilePosition.y][character.tilePosition.x] = 0
+		})
+		
+		const graph = new Graph(mapData)
 		const start = graph.grid[state.activeCharacter.tilePosition.y][state.activeCharacter.tilePosition.x]
 		const end = graph.grid[state.highlighted.y][state.highlighted.x]
-		state.activeCharacter.walkPath(astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x })))
-		state.canAct = false
+		const route = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
+		if (route.length) {
+			state.activeCharacter.walkPath(route)
+			state.canAct = false
+		}
 
 	}
 });
