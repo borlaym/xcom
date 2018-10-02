@@ -24,15 +24,16 @@ map.loaded.then(start)
 
 const globalIllumination = new THREE.AmbientLight(0xffffff, 0.4)
 scene.add(globalIllumination)
+const state = new GameState()
 
 function start() {
+	state.init(camera, scene, map.mapData)
+	renderUI()
 	map.tiles.forEach(tile => scene.add(tile.mesh))
 	map.lights.forEach(light => scene.add(light))
 	animate();
 }
 
-const state = new GameState()
-state.init(camera, scene)
 state.on('updateUI', () => {
 	renderUI()
 })
@@ -48,16 +49,11 @@ document.addEventListener('keyup', (event) => {
 document.addEventListener('click', () => {
 	if (state.highlighted && state.canAct) {
 		// Pathfinding
-		const mapData = JSON.parse(JSON.stringify(map.mapData))
-		state.characters.forEach(character => {
-			mapData[character.tilePosition.y][character.tilePosition.x] = 0
-		})
-		
-		const graph = new Graph(mapData)
+		const graph = new Graph(state.mapDataWithCharacters)
 		const start = graph.grid[state.activeCharacter.tilePosition.y][state.activeCharacter.tilePosition.x]
 		const end = graph.grid[state.highlighted.y][state.highlighted.x]
 		const route = astar.search(graph, start, end).map(obj => ({ x: obj.y, y: obj.x }))
-		if (route.length) {
+		if (route.length <= 3 && route.length !== 0) {
 			state.activeCharacter.walkPath(route)
 			state.canAct = false
 		}
@@ -79,7 +75,15 @@ function animate() {
 	const cameraMotion = state.cameraMotion
 
 	// Check for mouse pointing
-	map.tiles.forEach(tile => tile instanceof Floor && tile.removeHighlight())
+	map.tiles.forEach(tile => {
+		if (tile instanceof Floor) {
+			tile.removeHighlight()
+			const tileSelectable = state.movableSpaces.find(space => space.x === tile.col && space.y === tile.row)
+			if (tileSelectable) {
+				tile.selectable()
+			} 
+		}
+	})
 	if (state.canAct) {
 		const mouseRaycaster = new THREE.Raycaster();
 		mouseRaycaster.setFromCamera(state.mousePos, camera.camera)
@@ -129,4 +133,3 @@ function renderUI() {
 }
 
 
-renderUI()

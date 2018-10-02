@@ -11,6 +11,9 @@ const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x444444, map: floo
 const highlightedMaterial = floorMaterial.clone()
 highlightedMaterial.color.set(0x00ff00)
 
+const selectableMaterial = floorMaterial.clone()
+selectableMaterial.color.set(0xaaaaaa)
+
 export default class Floor extends MapTile {
 	constructor(
 		public readonly row: number,
@@ -23,6 +26,10 @@ export default class Floor extends MapTile {
 
 	public highlight() {
 		this.mesh.material = highlightedMaterial
+	}
+
+	public selectable() {
+		this.mesh.material = selectableMaterial
 	}
 
 	public removeHighlight() {

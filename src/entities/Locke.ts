@@ -4,6 +4,7 @@ import { Frame } from './Frame';
 export default class CharacterLocke extends Character {
 	public name: string = "Locke";
 	public icon: string = "icons/locke.png";
+	public readonly isPlayer: boolean = true;
 	protected readonly frames: {
 		standing: Animation,
 		[name: string]: Animation

@@ -5,6 +5,7 @@ import ICoordinate from "./Coordinate";
 import Movable from "./Movable";
 import { directionToVector } from "../utils/directionToVector";
 import vectorToDirection from "../utils/vectorToDirection";
+import { astar, Graph } from '../astar'
 export interface Animation {
 	n: Frame[],
 	e: Frame[],
@@ -17,6 +18,7 @@ export default abstract class Character extends Movable {
 	public abstract readonly icon: string
 	public readonly collider: THREE.Object3D
 	public readonly sprite: THREE.Sprite
+	public readonly isPlayer: boolean = false;
 	public path: ICoordinate[] = [];
 	public tilePosition: ICoordinate;
 	protected abstract readonly frames: {
@@ -113,6 +115,26 @@ export default abstract class Character extends Movable {
 		const directionVector = directionToVector(this.movementDirection)
 		const cameraAdjustedDirection = (new Vector2(directionVector.x, -directionVector.z)).rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
 		return vectorToDirection(cameraAdjustedDirection)
+	}
+
+	public getMovableSpaces(mapData: number[][]) {
+		const spaces: ICoordinate[] = []
+		const graph = new Graph(mapData)
+		mapData.forEach((row, y) => {
+			row.forEach((col, x) => {
+				// At most 3 tiles away
+				if (Math.abs(y - this.tilePosition.y) <= 3 && Math.abs(x - this.tilePosition.x) <= 3) {
+					// If it is walkable
+					const start = graph.grid[this.tilePosition.y][this.tilePosition.x]
+					const end = graph.grid[y][x]
+					const route = astar.search(graph, start, end)
+					if (route.length <= 3 && route.length !== 0) {
+						spaces.push({ x, y })
+					}
+				}
+			})
+		})
+		return spaces
 	}
 
 	private get frameSet(): Frame[] {
