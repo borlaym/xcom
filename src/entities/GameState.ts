@@ -113,6 +113,7 @@ export default class GameState extends EventEmitter {
 					}
 				}
 			}
+			console.log(targetTiles)
 			const paths: Coordinates[][] = []
 			targetTiles.forEach(target => {
 				const start = graph.grid[this.activeCharacter.tilePosition.y][this.activeCharacter.tilePosition.x]
@@ -120,10 +121,12 @@ export default class GameState extends EventEmitter {
 				const route = astar.search(graph, start, end)
 				paths.push(route.map((gridNode) => ({ x: gridNode.y, y: gridNode.x })))
 			})
-			const shortestPaths = paths.filter(path => path.length === Math.min(...paths.map(path => path.length)))
-			const path = shortestPaths[0].slice(0, 3)
-			if (path.length) {
-				this.activeCharacter.walkPath(path)
+			console.log(paths)
+			const minPathLength = Math.min(...paths.filter(path => path.length !== 0).map(path => path.length))
+			const shortestPaths = paths.filter(path => path.length === minPathLength)
+			const shortestPath = shortestPaths[0]
+			if (shortestPath) {
+				this.activeCharacter.walkPath(shortestPath.slice(0, 3))
 			} else {
 				this.nextCharacter()
 			}
