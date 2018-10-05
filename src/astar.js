@@ -34,7 +34,7 @@
 	}
 
 	var astar = {
-		
+
 		search: function (graph, start, end, options) {
 			graph.cleanDirty();
 			options = options || {};
@@ -138,7 +138,7 @@
 		}
 	};
 
-	
+
 	function Graph(gridIn, options) {
 		options = options || {};
 		this.nodes = [];
@@ -383,7 +383,8 @@
 
 	return {
 		astar: astar,
-		Graph: Graph
+		Graph: Graph,
+		GridNode
 	};
 
 });

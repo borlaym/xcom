@@ -5,6 +5,7 @@ import CharacterSolider from "./Soldier";
 import CharacterLocke from "./Locke";
 import { EventEmitter } from "events";
 import GameCamera from "./GameCamera";
+import { astar, Graph } from '../astar'
 
 const SPEED = 0.1;
 
@@ -15,6 +16,7 @@ export default class GameState extends EventEmitter {
 		y: 0
 	};
 	public highlighted: Coordinates | null = null;
+	public playerCharacter: Character;
 	public characters: Character[]
 	public activeCharacter: Character
 	public canAct: boolean = true;
@@ -60,6 +62,7 @@ export default class GameState extends EventEmitter {
 		soldier2.tilePosition = { x: 18, y: 6 }
 		soldier2.position = new Vector3(18, 0, 6)
 
+		this.playerCharacter = character
 		this.characters = [character, soldier1, soldier2]
 		scene.add(character.sprite)
 		scene.add(soldier1.sprite)
@@ -90,8 +93,41 @@ export default class GameState extends EventEmitter {
 		const activeCharacterIndex = this.characters.indexOf(this.activeCharacter)
 		const nextIndex = activeCharacterIndex === this.characters.length - 1 ? 0 : activeCharacterIndex + 1;
 		this.activeCharacter = this.characters[nextIndex]
-		this.selectableSpaces = this.activeCharacter.getMovableSpaces(this.mapDataWithCharacters)
-		this.canAct = true;
+		if (this.activeCharacter.isPlayer) {
+			console.log('player character')
+			this.selectableSpaces = this.activeCharacter.getMovableSpaces(this.mapDataWithCharacters)
+			this.canAct = true;
+		} else {
+			console.log('npc')
+			// Enemies go towards the player character
+			const mapData = this.mapDataWithCharacters
+			const graph = new Graph(mapData)
+			const targetTiles: Coordinates[] = []
+			for (let row = this.playerCharacter.tilePosition.y - 1; row <= this.playerCharacter.tilePosition.y + 1; row++) {
+				for (let col = this.playerCharacter.tilePosition.x - 1; col <= this.playerCharacter.tilePosition.x + 1; col++) {
+					if (mapData[row][col] === 1) {
+						targetTiles.push({
+							x: col,
+							y: row
+						})
+					}
+				}
+			}
+			const paths: Coordinates[][] = []
+			targetTiles.forEach(target => {
+				const start = graph.grid[this.activeCharacter.tilePosition.y][this.activeCharacter.tilePosition.x]
+				const end = graph.grid[target.y][target.x]
+				const route = astar.search(graph, start, end)
+				paths.push(route.map((gridNode) => ({ x: gridNode.y, y: gridNode.x })))
+			})
+			const shortestPaths = paths.filter(path => path.length === Math.min(...paths.map(path => path.length)))
+			const path = shortestPaths[0].slice(0, 3)
+			if (path.length) {
+				this.activeCharacter.walkPath(path)
+			} else {
+				this.nextCharacter()
+			}
+		}
 		this.gameCamera.focus(this.activeCharacter.sprite)
 		this.emit('updateUI')
 	}
