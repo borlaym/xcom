@@ -5,7 +5,8 @@ import rotateAroundPoint from "utils/rotateAroundPoint";
 
 export default class GameCamera extends Movable {
 	public camera: Camera;
-	
+	private following: Object3D | null
+
 	constructor() {
 		super()
 		this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -46,9 +47,18 @@ export default class GameCamera extends Movable {
 	public rotateRight() {
 		this.rotate(0.05)
 	}
-	
+
 	public tick(d: number) {
-		this._movementTick(d)
+		if (this.following) {
+			const movement = this.following.position.clone().sub(this.lookingAt)
+			this.position.add(movement)
+		} else {
+			this._movementTick(d)
+		}
+	}
+
+	public follow(object: Object3D | null) {
+		this.following = object
 	}
 
 	private rotate(rotation: number) {
@@ -56,6 +66,6 @@ export default class GameCamera extends Movable {
 	}
 
 
-	
+
 
 }

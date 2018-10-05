@@ -94,11 +94,11 @@ export default class GameState extends EventEmitter {
 		const nextIndex = activeCharacterIndex === this.characters.length - 1 ? 0 : activeCharacterIndex + 1;
 		this.activeCharacter = this.characters[nextIndex]
 		if (this.activeCharacter.isPlayer) {
-			console.log('player character')
 			this.selectableSpaces = this.activeCharacter.getMovableSpaces(this.mapDataWithCharacters)
 			this.canAct = true;
+			// this.gameCamera.follow(null)
 		} else {
-			console.log('npc')
+			// this.gameCamera.follow(this.activeCharacter.sprite)
 			// Enemies go towards the player character
 			const mapData = this.mapDataWithCharacters
 			const graph = new Graph(mapData)
@@ -113,7 +113,6 @@ export default class GameState extends EventEmitter {
 					}
 				}
 			}
-			console.log(targetTiles)
 			const paths: Coordinates[][] = []
 			targetTiles.forEach(target => {
 				const start = graph.grid[this.activeCharacter.tilePosition.y][this.activeCharacter.tilePosition.x]
@@ -121,7 +120,6 @@ export default class GameState extends EventEmitter {
 				const route = astar.search(graph, start, end)
 				paths.push(route.map((gridNode) => ({ x: gridNode.y, y: gridNode.x })))
 			})
-			console.log(paths)
 			const minPathLength = Math.min(...paths.filter(path => path.length !== 0).map(path => path.length))
 			const shortestPaths = paths.filter(path => path.length === minPathLength)
 			const shortestPath = shortestPaths[0]
