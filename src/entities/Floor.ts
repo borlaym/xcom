@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import MapTile from "./MapTile";
+import Transform from "classes/components/Transform";
+import Rendering from "classes/components/Rendering";
+import { Mesh } from "three";
 
 const floorTexture = new THREE.TextureLoader().load("textures/3.png");
 floorTexture.wrapS = THREE.RepeatWrapping;
@@ -21,18 +24,18 @@ export default class Floor extends MapTile {
 	) {
 		super(row, col, new THREE.Mesh(floorGeometry, floorMaterial))
 		// Floor tiles are rotated to be facing up
-		this.mesh.rotation.x = -Math.PI / 2
+		this.getComponent(Transform).rotation.x = -Math.PI / 2
 	}
 
 	public highlight() {
-		this.mesh.material = highlightedMaterial
+		(this.getComponent(Rendering).mesh as Mesh).material = highlightedMaterial
 	}
 
 	public selectable() {
-		this.mesh.material = selectableMaterial
+		(this.getComponent(Rendering).mesh as Mesh).material = selectableMaterial
 	}
 
 	public removeHighlight() {
-		this.mesh.material = floorMaterial
+		(this.getComponent(Rendering).mesh as Mesh).material = floorMaterial
 	}
 }

@@ -1,12 +1,19 @@
-export default class MapTile {
+import GameObject from "classes/GameObject";
+import Rendering from "classes/components/Rendering";
+import Transform from "classes/components/Transform";
+
+export default class MapTile extends GameObject {
 	public readonly uuid: string
 	constructor(
 		public readonly row: number,
 		public readonly col: number,
-		public readonly mesh: THREE.Mesh
+		mesh: THREE.Mesh
 	) {
-		this.mesh.position.x = col;
-		this.mesh.position.z = row;
-		this.uuid = this.mesh.uuid
+		super()
+		this.addComponent(new Rendering(mesh))
+		const transform = this.getComponent(Transform)
+		transform.position.x = col;
+		transform.position.z = row;
+		this.uuid = mesh.uuid
 	}
 }
