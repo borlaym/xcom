@@ -5,10 +5,10 @@ import Wall from "./Wall";
 import Floor from "./Floor";
 import BlackBox from "./BlackBox";
 import * as THREE from "three";
+import GameWorld from "classes/GameWorld";
 
 export default class Map {
 	public readonly loaded: Promise<void>
-	public tiles: MapTile[] = [];
 	public mapData: number[][] = [];
 	public lights: THREE.PointLight[] = []
 	constructor(
@@ -36,12 +36,12 @@ export default class Map {
 			// On white, add a tile
 			if (r === 255 && g === 255 && b === 255) {
 				const wall = new Wall(row, col)
-				mapTiles.push(wall)
+				GameWorld.addObject(wall)
 			}
 			// On gray, add a floor tile
 			if (r === 51 && g === 51 && b === 51) {
 				const floor = new Floor(row, col)
-				mapTiles.push(floor)
+				GameWorld.addObject(floor)
 				mapData[mapData.length - 1].push(1)
 			} else {
 				// Everything that is not a floor is not a movable space
@@ -50,11 +50,10 @@ export default class Map {
 			// On black, add a blocking tile
 			if (r === 0 && g === 0 && b === 0) {
 				const blackBox = new BlackBox(row, col)
-				mapTiles.push(blackBox)
+				GameWorld.addObject(blackBox)
 			}
 		}
 
-		this.tiles = mapTiles
 		this.mapData = mapData
 	}
 

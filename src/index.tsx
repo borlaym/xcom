@@ -7,9 +7,17 @@ import GameState from 'entities/GameState';
 import * as ReactDOM from 'react-dom';
 import UI from 'components/UI';
 import * as React from 'react';
-import GameCamera from 'entities/GameCamera';
+import GameScene from 'classes/GameScene';
+import GameCamera from 'classes/GameCamera';
+import GameWorld from 'classes/GameWorld';
+import GameObject from 'classes/GameObject';
+import Collision from 'classes/components/Collision';
+import InputController from 'classes/InputController';
+import Rendering from 'classes/components/Rendering';
 
-const scene = new THREE.Scene();
+const gameScene = new GameScene()
+const map = new Map('test')
+map.loaded.then(start)
 
 let lastTick: number = Date.now()
 
@@ -17,34 +25,49 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const camera = new GameCamera()
+function update() {
+	const now = Date.now()
+	const dt = now - lastTick
+	lastTick = now
 
-const map = new Map('test')
-map.loaded.then(start)
+	// Update colliders
+	GameObject.getComponentsOfType(Collision).forEach(c => c.update(dt))
 
-const globalIllumination = new THREE.AmbientLight(0xffffff, 0.4)
-scene.add(globalIllumination)
-const state = new GameState()
+	// Update InputController
+	InputController.update()
+
+	// Update gameObjects
+	GameWorld.update(dt)
+
+	// Update meshes
+	GameObject.getComponentsOfType(Rendering).forEach(c => c.update(dt))
+
+	// Reset InputController
+	InputController.reset()
+
+	// Render
+	renderer.render(gameScene.scene, GameCamera.camera);
+	requestAnimationFrame(update)
+}
 
 function start() {
-	state.init(camera, scene, map.mapData)
+	GameWorld.setup(map.mapData)
+	map.lights.forEach(light => gameScene.scene.add(light))
 	renderUI()
-	map.tiles.forEach(tile => scene.add(tile.mesh))
-	map.lights.forEach(light => scene.add(light))
-	animate();
+	update();
 }
+
+////////////////
+
+
+const globalIllumination = new THREE.AmbientLight(0xffffff, 0.4)
+gameScene.scene.add(globalIllumination)
+const state = new GameState()
 
 state.on('updateUI', () => {
 	renderUI()
 })
 
-document.addEventListener('keydown', (event) => {
-	state.keysDown = uniq(state.keysDown.concat(event.key));
-});
-
-document.addEventListener('keyup', (event) => {
-	state.keysDown = state.keysDown.filter(key => key !== event.key);
-});
 
 document.addEventListener('click', () => {
 	if (state.highlighted && state.canAct) {

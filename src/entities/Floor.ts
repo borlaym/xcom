@@ -3,6 +3,7 @@ import MapTile from "./MapTile";
 import Transform from "classes/components/Transform";
 import Rendering from "classes/components/Rendering";
 import { Mesh } from "three";
+import Collision from "classes/components/Collision";
 
 const floorTexture = new THREE.TextureLoader().load("textures/3.png");
 floorTexture.wrapS = THREE.RepeatWrapping;
@@ -10,6 +11,7 @@ floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(1, 1);
 const floorGeometry = new THREE.PlaneGeometry(1, 1);
 const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x444444, map: floorTexture });
+const colliderMaterial = new THREE.MeshBasicMaterial({ visible: false })
 
 const highlightedMaterial = floorMaterial.clone()
 highlightedMaterial.color.set(0x00ff00)
@@ -25,6 +27,7 @@ export default class Floor extends MapTile {
 		super(row, col, new THREE.Mesh(floorGeometry, floorMaterial))
 		// Floor tiles are rotated to be facing up
 		this.getComponent(Transform).rotation.x = -Math.PI / 2
+		this.addComponent(new Collision(new THREE.Mesh(floorGeometry, colliderMaterial)))
 	}
 
 	public highlight() {

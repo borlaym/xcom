@@ -1,11 +1,16 @@
 import * as THREE from "three";
 import { Frame } from "./Frame";
-import { Vector3, Vector2 } from "three";
+import { Vector3, Vector2, Sprite } from "three";
 import ICoordinate from "./Coordinate";
-import Movable from "./Movable";
 import { directionToVector } from "../utils/directionToVector";
 import vectorToDirection from "../utils/vectorToDirection";
 import { astar, Graph } from '../astar'
+import GameObject from "classes/GameObject";
+import Collision from "classes/components/Collision";
+import Rendering from "classes/components/Rendering";
+import Movement from "classes/components/Movement";
+import Transform from "classes/components/Transform";
+import GameCamera from "../classes/GameCamera";
 export interface Animation {
 	n: Frame[],
 	e: Frame[],
@@ -13,11 +18,9 @@ export interface Animation {
 	w: Frame[]
 }
 
-export default abstract class Character extends Movable {
+export default abstract class Character extends GameObject {
 	public abstract readonly name: string
 	public abstract readonly icon: string
-	public readonly collider: THREE.Object3D
-	public readonly sprite: THREE.Sprite
 	public readonly isPlayer: boolean = false;
 	public path: ICoordinate[] = [];
 	public tilePosition: ICoordinate;
@@ -27,14 +30,11 @@ export default abstract class Character extends Movable {
 	}
 	private animationLength: number = 600;
 	private animation: string = 'standing';
-	private readonly material: THREE.SpriteMaterial
 	private readonly canvas: HTMLCanvasElement
 	private readonly ctx: CanvasRenderingContext2D
 	private spriteMap: HTMLImageElement
-	private readonly texture: THREE.Texture
 	constructor(
-		spriteName: string,
-		private readonly gameCamera: THREE.Camera
+		spriteName: string
 	) {
 		super()
 		this.canvas = document.createElement('canvas')
@@ -45,35 +45,35 @@ export default abstract class Character extends Movable {
 		ctx.imageSmoothingEnabled = false
 		this.ctx = ctx
 
-		this.texture = new THREE.CanvasTexture(this.canvas)
-		this.texture.magFilter = THREE.NearestFilter
-		this.texture.minFilter = THREE.NearestFilter
-		const plane = new THREE.PlaneGeometry(0.5, 0.5);
-		plane.translate(0, 0.5, 0)
-		this.material = new THREE.SpriteMaterial({
-			map: this.texture,
+		const texture = new THREE.CanvasTexture(this.canvas)
+		texture.magFilter = THREE.NearestFilter
+		texture.minFilter = THREE.NearestFilter
+		const material = new THREE.SpriteMaterial({
+			map: texture,
 			color: 0xffffff,
 			transparent: true,
 			side: THREE.DoubleSide,
 			lights: true
 		});
 
-		this.sprite = new THREE.Sprite(this.material);
-		this.sprite.center = new THREE.Vector2(0.5, 0)
-		this.sprite.scale.x = 0.5
-		this.sprite.scale.y = 0.5
-		this.sprite.scale.z = 0.5
+		const sprite = new THREE.Sprite(material);
+		sprite.center = new THREE.Vector2(0.5, 0)
+		sprite.scale.x = 0.5
+		sprite.scale.y = 0.5
+		sprite.scale.z = 0.5
+		this.addComponent(new Rendering(sprite))
 
 		const colliderGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5, 1, 1, 1);
 		const colliderMaterial = new THREE.MeshBasicMaterial({ opacity: 0 })
-		this.collider = new THREE.Mesh(colliderGeometry, colliderMaterial);
+		this.addComponent(new Collision(new THREE.Mesh(colliderGeometry, colliderMaterial)))
+
+		this.addComponent(new Movement())
 
 		this.loadSpriteSheet(spriteName)
-		this.on('finishedTransition', (leftOver) => this.finishedMovement(leftOver))
 	}
 
-	public tick(d: number) {
-		this._movementTick(d)
+	public update(dt: number) {
+		this.getComponent(Movement).update(dt)
 		if (this.path.length) {
 			this.setAnimation('walking')
 			this.updateFacing()
@@ -86,7 +86,7 @@ export default abstract class Character extends Movable {
 	public walkPath(path: ICoordinate[]) {
 		this.path = path
 		const firstTile = path[0]
-		this.moveTo(new Vector3(firstTile.x, 0, firstTile.y), 400)
+		this.getComponent(Movement).moveTo(new Vector3(firstTile.x, 0, firstTile.y), 400)
 	}
 
 	public updateFacing() {
@@ -99,21 +99,16 @@ export default abstract class Character extends Movable {
 	}
 
 	public get position() {
-		return this.collider.position
+		return this.getComponent(Transform).position
 	}
 
 	public set position(v: Vector3) {
-		this.collider.position.set(v.x, v.y, v.z)
-		this.sprite.position.set(v.x, v.y, v.z)
+		this.getComponent(Transform).position.set(v.x, v.y, v.z)
 	}
 	
-	public get camera() {
-		return this.gameCamera
-	}
-
 	public get facing() {
-		const directionVector = directionToVector(this.movementDirection)
-		const cameraAdjustedDirection = (new Vector2(directionVector.x, -directionVector.z)).rotateAround(new Vector2(0, 0), -this.camera.rotation.y)
+		const directionVector = directionToVector(this.getComponent(Movement).movementDirection)
+		const cameraAdjustedDirection = (new Vector2(directionVector.x, -directionVector.z)).rotateAround(new Vector2(0, 0), -GameCamera.camera.rotation.y)
 		return vectorToDirection(cameraAdjustedDirection)
 	}
 
@@ -148,13 +143,14 @@ export default abstract class Character extends Movable {
 		}
 		if (this.path.length > 0) {
 			const firstTile = this.path[0]
-			this.moveTo(new Vector3(firstTile.x, 0, firstTile.y), 400)
+			this.getComponent(Movement).moveTo(new Vector3(firstTile.x, 0, firstTile.y), 400)
 		}
 		if (leftOver) {
-			this._movementTick(leftOver)
+			this.getComponent(Movement).update(leftOver)
 		}
 		if (this.path.length === 0) {
-			this.emit('finishedMoving')
+			// this.emit('finishedMoving')
+			return
 		}
 	}
 
@@ -174,8 +170,8 @@ export default abstract class Character extends Movable {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 		this.canvas.width = frame.w
 		this.canvas.height = frame.h
-		this.ctx.drawImage(this.spriteMap, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h)
-		this.texture.needsUpdate = true
+		this.ctx.drawImage(this.spriteMap, frame.x, frame.y, frame.w, frame.h, 0, 0, frame.w, frame.h);
+		(this.getComponent(Rendering).mesh as Sprite).material.needsUpdate = true
 	}
 
 }

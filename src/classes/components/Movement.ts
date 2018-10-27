@@ -12,7 +12,7 @@ interface MovementData {
 }
 
 export default class Movement extends Component {
-	private movementDirection: Direction = Direction.South
+	public movementDirection: Direction = Direction.South
 	private movement: MovementData | null = null
 
 	public moveTo(to: Vector3, duration = 300) {
@@ -40,7 +40,6 @@ export default class Movement extends Component {
 			this.gameObject.getComponent(Transform).position.set(newPos.x, newPos.y, newPos.z)
 			if (this.movement.progress === this.movement.duration) {
 				this.movement = null;
-				this.emit('finishedTransition', leftOver)
 			}
 		}
 	}

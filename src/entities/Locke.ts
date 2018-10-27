@@ -1,5 +1,6 @@
 import Character, { Animation } from 'entities/Character'
 import { Frame } from './Frame';
+import Transform from 'classes/components/Transform';
 
 export default class CharacterLocke extends Character {
 	public name: string = "Locke";
@@ -23,8 +24,8 @@ export default class CharacterLocke extends Character {
 			}
 		};
 
-	constructor(camera: THREE.Camera) {
-		super('textures/locke.png', camera);
-		this.sprite.scale.y = 0.7
+	constructor() {
+		super('textures/locke.png');
+		this.getComponent(Transform).scale.y = 0.7
 	}
 }

@@ -1,20 +1,16 @@
 import Coordinates from "./Coordinate";
-import { Vector3, Scene } from "three";
+import { Vector3 } from "three";
 import Character from "./Character";
-import CharacterSolider from "./Soldier";
 import CharacterLocke from "./Locke";
 import { EventEmitter } from "events";
-import GameCamera from "./GameCamera";
 import { astar, Graph } from '../astar'
+import GameWorld from "classes/GameWorld";
+import GameObject from "classes/GameObject";
+import GameCamera from "classes/GameCamera";
 
 const SPEED = 0.1;
 
 export default class GameState extends EventEmitter {
-	public keysDown: string[] = []
-	public mousePos: Coordinates = {
-		x: 0,
-		y: 0
-	};
 	public highlighted: Coordinates | null = null;
 	public playerCharacter: Character;
 	public characters: Character[]
@@ -22,7 +18,6 @@ export default class GameState extends EventEmitter {
 	public canAct: boolean = true;
 	public selectableSpaces: Coordinates[] = []
 
-	private gameCamera: GameCamera
 	private mapData: number[][]
 
 	public onMouseMove(event: MouseEvent) {
@@ -47,43 +42,14 @@ export default class GameState extends EventEmitter {
 		return motion
 	}
 
-	public init(camera: GameCamera, scene: Scene, mapData: number[][]) {
-		this.mapData = mapData;
-
-		const character = new CharacterLocke(camera.camera);
-		character.tilePosition = { x: 16, y: 16 }
-		character.position = new Vector3(16, 0, 16);
-
-		const soldier1 = new CharacterSolider(camera.camera);
-		soldier1.tilePosition = { x: 14, y: 14 }
-		soldier1.position = new Vector3(14, 0, 14)
-
-		const soldier2 = new CharacterSolider(camera.camera);
-		soldier2.tilePosition = { x: 18, y: 6 }
-		soldier2.position = new Vector3(18, 0, 6)
-
-		this.playerCharacter = character
-		this.characters = [character, soldier1, soldier2]
-		scene.add(character.sprite)
-		scene.add(soldier1.sprite)
-		scene.add(soldier2.sprite)
-
-		this.activeCharacter = character
-
-		this.characters.forEach(character => character.on('finishedMoving', () => {
-			this.nextCharacter()
-		}))
+	public init() {
+		this.activeCharacter = GameObject.getObjectsOfType(CharacterLocke)[0]
 		this.selectableSpaces = this.activeCharacter.getMovableSpaces(this.mapDataWithCharacters)
-		this.gameCamera = camera
-	}
-
-	public tick(d: number) {
-		this.characters.forEach(character => character.tick(d))
 	}
 
 	public get mapDataWithCharacters() {
 		const mapData = JSON.parse(JSON.stringify(this.mapData))
-		this.characters.forEach(character => {
+		GameWorld.characters.forEach(character => {
 			mapData[character.tilePosition.y][character.tilePosition.x] = 0
 		})
 		return mapData
@@ -129,7 +95,7 @@ export default class GameState extends EventEmitter {
 				this.nextCharacter()
 			}
 		}
-		this.gameCamera.focus(this.activeCharacter.sprite)
-		this.emit('updateUI')
+		GameCamera.focus(this.activeCharacter)
+		// this.emit('updateUI')
 	}
 }
